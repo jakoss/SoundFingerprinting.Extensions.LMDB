@@ -217,7 +217,7 @@ Frequency=3222656 Hz, Resolution=310.3031 ns, Timer=TSC
 | **InMemoryRecognitions** | **eddy_(...)t.wav [26]** |   **229.5 ms** |  **2.6037 ms** |  **2.4355 ms** |   **1.00** |     **0.00** |   **9000.0000** |  **1000.0000** |         **-** |  **71.15 MB** |
 |     LMDBRecognitions | eddy_(...)t.wav [26] |   254.2 ms |  3.8611 ms |  3.2242 ms |   1.11 |     0.02 |  15000.0000 |  1000.0000 |         - |  88.86 MB |
 
-## Contribue
+## Contribute
 
 All are welcome to open Issues and Pull Requests. You can contact me on email [jakub.nekro@gmail.com](mailto:jakub.nekro@gmail.com) if you have further questions, opinions and feature ideas.
 
