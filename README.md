@@ -8,7 +8,7 @@ Database adapter for SoundFingerprinting algorithm using LMDB database. It's fas
 
 To use LMDB database with SoundFingerprinting create `LMDBModelService` object and use it in algorithm, like this:
 
-```
+```csharp
 var audioService = new SoundFingerprintingAudioService();
 using(var modelService = new LMDBModelService("db")){
 	var track = new TrackData("GBBKS1200164", "Adele", "Skyfall", "Skyfall", 2012, 290);
