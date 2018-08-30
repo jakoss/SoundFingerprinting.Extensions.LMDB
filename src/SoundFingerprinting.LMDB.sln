@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2003
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundFingerprinting.LMDB", "SoundFingerprinting.LMDB\SoundFingerprinting.LMDB.csproj", "{B96D4F64-FF6C-4DDA-880A-45E6A59F281D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundFingerprinting.LMDB.Tests", "SoundFingerprinting.LMDB.Tests\SoundFingerprinting.LMDB.Tests.csproj", "{8E6EB152-EA64-4312-BA22-10CAFB497A59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundFingerprinting.LMDB.Benchmarks", "SoundFingerprinting.LMDB.Benchmarks\SoundFingerprinting.LMDB.Benchmarks.csproj", "{8BC34222-838E-4DA1-B9E8-3811D7759EC7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B96D4F64-FF6C-4DDA-880A-45E6A59F281D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B96D4F64-FF6C-4DDA-880A-45E6A59F281D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B96D4F64-FF6C-4DDA-880A-45E6A59F281D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B96D4F64-FF6C-4DDA-880A-45E6A59F281D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E6EB152-EA64-4312-BA22-10CAFB497A59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E6EB152-EA64-4312-BA22-10CAFB497A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E6EB152-EA64-4312-BA22-10CAFB497A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E6EB152-EA64-4312-BA22-10CAFB497A59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BC34222-838E-4DA1-B9E8-3811D7759EC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BC34222-838E-4DA1-B9E8-3811D7759EC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BC34222-838E-4DA1-B9E8-3811D7759EC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BC34222-838E-4DA1-B9E8-3811D7759EC7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F7ED8E00-471B-4702-A86D-6DD1441623FC}
+	EndGlobalSection
+EndGlobal
