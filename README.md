@@ -34,7 +34,7 @@ It's **VERY** important to dispose modelService after usage (although it's best 
 
 ## Technical details
 
-LMDB itself is very fast key-value based on B+Tree and Memory Mapped File.
+LMDB itself is very fast key-value database based on B+Tree and Memory Mapped File.
 
 This storage is slow to write (because inserts and deletes are single threaded - locks are already in code) but very fast to random reads (very efficent reading in highly concurrent environments).
 
