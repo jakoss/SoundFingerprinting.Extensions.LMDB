@@ -1,10 +1,24 @@
 # SoundFingerprinting.LMDB
 
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+[![NuGet](https://img.shields.io/nuget/dt/SoundFingerprinting.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.LMDB/1.0.0) [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE) [![GitHub issues](https://img.shields.io/github/issues/Nekromancer/SoundFingerprinting.LMDB.svg?style=flat-square)](https://github.com/Nekromancer/SoundFingerprinting.LMDB) [![NuGet](https://img.shields.io/nuget/v/SoundFingerprinting.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.LMDB/1.0.0)
+
+
 
 Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.
 
 ## Usage
+
+To get library simply install it from [Nuget](https://www.nuget.org/packages/SoundFingerprinting.LMDB/1.0.0):
+
+```
+Install-Package SoundFingerprinting.LMDB
+```
+
+or using `dotnet cli`
+
+```
+dotnet add package SoundFingerprinting.LMDB
+```
 
 To use LMDB database with SoundFingerprinting create `LMDBModelService` object and use it in algorithm, like this:
 
