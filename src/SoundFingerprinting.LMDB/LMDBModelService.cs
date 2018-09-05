@@ -10,7 +10,9 @@ namespace SoundFingerprinting.LMDB
     {
         private readonly DatabaseContext databaseContext;
 
-        public LMDBModelService(string pathToDatabase) : this(new DatabaseContext(pathToDatabase))
+        // Default map size is 10 GB
+        public LMDBModelService(string pathToDatabase, long mapSize = (1024L * 1024L * 1024L * 10L)) : this(new DatabaseContext(pathToDatabase, mapSize))
+
         {
         }
 

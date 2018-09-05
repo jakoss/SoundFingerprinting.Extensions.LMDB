@@ -10,6 +10,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>soundfingerprinting database lmdb</PackageTags>
     <Description>Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.</Description>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
