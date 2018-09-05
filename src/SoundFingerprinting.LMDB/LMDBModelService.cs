@@ -1,4 +1,5 @@
-﻿using SoundFingerprinting.LMDB.LMDBDatabase;
+﻿using LightningDB;
+using SoundFingerprinting.LMDB.LMDBDatabase;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -11,7 +12,10 @@ namespace SoundFingerprinting.LMDB
         private readonly DatabaseContext databaseContext;
 
         // Default map size is 10 GB
-        public LMDBModelService(string pathToDatabase, long mapSize = (1024L * 1024L * 1024L * 10L)) : this(new DatabaseContext(pathToDatabase, mapSize))
+        public LMDBModelService(string pathToDatabase,
+            long mapSize = (1024L * 1024L * 1024L * 10L),
+            EnvironmentOpenFlags lmdbOpenFlags = EnvironmentOpenFlags.None
+        ) : this(new DatabaseContext(pathToDatabase, mapSize, lmdbOpenFlags))
 
         {
         }

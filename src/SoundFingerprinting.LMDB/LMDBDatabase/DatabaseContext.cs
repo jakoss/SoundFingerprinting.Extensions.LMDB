@@ -12,11 +12,14 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
         private readonly LightningEnvironment environment;
         private readonly DatabasesHolder databasesHolder;
 
-        public DatabaseContext(string pathToDatabase, long mapSize = (1024L * 1024L * 1024L * 10L)) : this(pathToDatabase, mapSize, 50)
+        public DatabaseContext(string pathToDatabase,
+            long mapSize = (1024L * 1024L * 1024L * 10L),
+            EnvironmentOpenFlags lmdbOpenFlags = EnvironmentOpenFlags.None
+        ) : this(pathToDatabase, mapSize, lmdbOpenFlags, 50)
         {
         }
 
-        private DatabaseContext(string pathToDatabase, long mapSize, int hashTablesCount)
+        private DatabaseContext(string pathToDatabase, long mapSize, EnvironmentOpenFlags lmdbOpenFlags, int hashTablesCount)
         {
             this.HashTablesCount = hashTablesCount;
 
@@ -24,9 +27,9 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             {
                 MaxReaders = 10000,
                 MaxDatabases = hashTablesCount + 2,
-                MapSize = mapSize // default 10 GB
+                MapSize = mapSize
             });
-            environment.Open(EnvironmentOpenFlags.NoSync | EnvironmentOpenFlags.NoLock);
+            environment.Open(lmdbOpenFlags);
 
             // Open all database to make sure they exists
             using (var tx = environment.BeginTransaction())
