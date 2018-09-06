@@ -86,12 +86,11 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             {
                 using (var cursor = tableDatabase.OpenCursor(tx))
                 {
-                    if (cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
+                    if (cursor.TryGet(ref key, ref value, CursorGetOption.First) && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
                     {
                         var counter = 0;
                         buffer = new ulong[cursor.Count()];
                         buffer[counter] = value.ReadUInt64(0);
-                        value = default;
 
                         while (cursor.TryGet(ref key, ref value, CursorGetOption.NextDuplicate))
                         {
@@ -111,12 +110,11 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             {
                 using (var cursor = tableDatabase.OpenReadOnlyCursor(rotx))
                 {
-                    if (cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
+                    if (cursor.TryGet(ref key, ref value, CursorGetOption.First) && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
                     {
                         var counter = 0;
                         buffer = new ulong[cursor.Count()];
                         buffer[counter] = value.ReadUInt64(0);
-                        value = default;
 
                         while (cursor.TryGet(ref key, ref value, CursorGetOption.NextDuplicate))
                         {
@@ -137,14 +135,7 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
                 throw new ArgumentException("Not an Transaction object", nameof(transaction));
             }
 
-            if (buffer != null)
-            {
-                return buffer;
-            }
-            else
-            {
-                throw new KeyNotFoundException();
-            }
+            return buffer != null ? buffer : new Span<ulong>();
         }
     }
 }
