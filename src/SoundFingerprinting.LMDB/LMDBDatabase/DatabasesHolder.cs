@@ -1,5 +1,5 @@
-﻿using LightningDB;
-using SoundFingerprinting.LMDB.DTO;
+﻿using SoundFingerprinting.LMDB.DTO;
+using Spreads.LMDB;
 using System;
 using System.Collections.Generic;
 
@@ -7,16 +7,16 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
 {
     internal class DatabasesHolder : IDisposable
     {
-        public DatabasesHolder(LightningDatabase tracksDatabase, LightningDatabase subFingerprintsDatabase, LightningDatabase[] hashTables)
+        public DatabasesHolder(Database tracksDatabase, Database subFingerprintsDatabase, Database[] hashTables)
         {
             TracksDatabase = tracksDatabase;
             SubFingerprintsDatabase = subFingerprintsDatabase;
             HashTables = hashTables;
         }
 
-        public LightningDatabase TracksDatabase { get; }
-        public LightningDatabase SubFingerprintsDatabase { get; }
-        public LightningDatabase[] HashTables { get; }
+        public Database TracksDatabase { get; }
+        public Database SubFingerprintsDatabase { get; }
+        public Database[] HashTables { get; }
 
         public readonly IDictionary<ulong, TrackDataDTO> Tracks = new Dictionary<ulong, TrackDataDTO>();
 

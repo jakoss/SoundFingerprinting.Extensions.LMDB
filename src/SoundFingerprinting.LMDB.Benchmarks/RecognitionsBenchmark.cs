@@ -22,6 +22,7 @@ namespace SoundFingerprinting.LMDB.Benchmarks
         {
             audioService = new SoundFingerprintingAudioService();
 
+            // TODO : set NoMemInit flag
             lmdbModelService = new LMDBModelService("db");
             inMemoryModelService = new InMemoryModelService("memory.db");
         }

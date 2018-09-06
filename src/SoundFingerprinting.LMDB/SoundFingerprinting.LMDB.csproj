@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net4.5;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Jakub Syty</Authors>
     <Company>EUVIC</Company>
     <PackageProjectUrl>https://github.com/Nekromancer/SoundFingerprinting.LMDB</PackageProjectUrl>
@@ -11,11 +11,12 @@
     <PackageTags>soundfingerprinting database lmdb</PackageTags>
     <Description>Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.</Description>
     <Version>1.0.2</Version>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LightningDB" Version="0.10.0" />
     <PackageReference Include="SoundFingerprinting" Version="5.2.2" />
     <PackageReference Include="ZeroFormatter" Version="1.6.4" />
+    <PackageReference Include="Spreads.LMDB" Version="1.0.0-build1809031215" />
   </ItemGroup>
 </Project>

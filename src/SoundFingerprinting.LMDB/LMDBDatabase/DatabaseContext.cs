@@ -1,5 +1,5 @@
-﻿using LightningDB;
-using SoundFingerprinting.LMDB.DTO;
+﻿using SoundFingerprinting.LMDB.DTO;
+using Spreads.LMDB;
 using System;
 using ZeroFormatter;
 
@@ -9,56 +9,52 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
     {
         public int HashTablesCount { get; }
 
-        private readonly LightningEnvironment environment;
+        private readonly LMDBEnvironment environment;
         private readonly DatabasesHolder databasesHolder;
 
         public DatabaseContext(string pathToDatabase,
             long mapSize = (1024L * 1024L * 1024L * 10L),
-            EnvironmentOpenFlags lmdbOpenFlags = EnvironmentOpenFlags.None
+            DbEnvironmentFlags lmdbOpenFlags = DbEnvironmentFlags.None
         ) : this(pathToDatabase, mapSize, lmdbOpenFlags, 50)
         {
         }
 
-        private DatabaseContext(string pathToDatabase, long mapSize, EnvironmentOpenFlags lmdbOpenFlags, int hashTablesCount)
+        private DatabaseContext(string pathToDatabase, long mapSize, DbEnvironmentFlags lmdbOpenFlags, int hashTablesCount)
         {
-            this.HashTablesCount = hashTablesCount;
+            HashTablesCount = hashTablesCount;
 
-            environment = new LightningEnvironment(pathToDatabase, new EnvironmentConfiguration
+            environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags);
+            environment.MapSize = mapSize;
+            environment.MaxDatabases = HashTablesCount + 2;
+            environment.MaxReaders = 1000;
+            environment.Open();
+
+            // Open all database to make sure they exists and to hold their handles
+            var configuration = new DatabaseConfig(DbFlags.Create | DbFlags.IntegerKey);
+
+            var tracksDatabase = environment.OpenDatabase("tracks", configuration);
+            var subFingerprintsDatabase = environment.OpenDatabase("subFingerprints", configuration);
+
+            var hashTables = new Database[hashTablesCount];
+            var hashTableConfig = new DatabaseConfig(
+                DbFlags.Create
+                | DbFlags.IntegerKey
+                | DbFlags.DuplicatesSort
+                | DbFlags.DuplicatesFixed
+                | DbFlags.IntegerDuplicates
+            );
+            for (int i = 0; i < hashTablesCount; i++)
             {
-                MaxReaders = 10000,
-                MaxDatabases = hashTablesCount + 2,
-                MapSize = mapSize
-            });
-            environment.Open(lmdbOpenFlags);
-
-            // Open all database to make sure they exists
-            using (var tx = environment.BeginTransaction())
-            {
-                var configuration = new DatabaseConfiguration
-                {
-                    Flags = DatabaseOpenFlags.Create | DatabaseOpenFlags.IntegerKey
-                };
-
-                var tracksDatabase = tx.OpenDatabase("tracks", configuration);
-                var subFingerprintsDatabase = tx.OpenDatabase("subFingerprints", configuration);
-
-                var hashTables = new LightningDatabase[hashTablesCount];
-                for (int i = 0; i < hashTablesCount; i++)
-                {
-                    hashTables[i] = tx.OpenDatabase($"HashTable{i}", configuration);
-                }
-
-                databasesHolder = new DatabasesHolder(tracksDatabase, subFingerprintsDatabase, hashTables);
-
-                ReadAllTracks(tx);
-
-                tx.Commit();
+                hashTables[i] = environment.OpenDatabase($"HashTable{i}", hashTableConfig);
             }
+
+            databasesHolder = new DatabasesHolder(tracksDatabase, subFingerprintsDatabase, hashTables);
+            ReadAllTracks();
         }
 
         public ReadOnlyTransaction OpenReadOnlyTransaction()
         {
-            return new ReadOnlyTransaction(environment.BeginTransaction(TransactionBeginFlags.ReadOnly), databasesHolder);
+            return new ReadOnlyTransaction(environment.BeginReadOnlyTransaction(), databasesHolder);
         }
 
         public ReadWriteTransaction OpenReadWriteTransaction()
@@ -72,17 +68,17 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             environment.Dispose();
         }
 
-        private void ReadAllTracks(LightningTransaction tx)
+        private void ReadAllTracks()
         {
-            using (var cursor = tx.CreateCursor(databasesHolder.TracksDatabase))
+            environment.Read(tx =>
             {
-                foreach (var item in cursor)
+                foreach (var item in databasesHolder.TracksDatabase.AsEnumerable(tx))
                 {
-                    var key = BitConverter.ToUInt64(item.Key, 0);
-                    var trackData = ZeroFormatterSerializer.Deserialize<TrackDataDTO>(item.Value);
+                    var key = item.Key.ReadUInt64(0);
+                    var trackData = ZeroFormatterSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray());
                     databasesHolder.Tracks.Add(key, trackData);
                 }
-            }
+            });
         }
     }
 }
