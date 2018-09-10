@@ -2,6 +2,7 @@
 using Spreads.Buffers;
 using Spreads.LMDB;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using ZeroFormatter;
 
@@ -69,12 +70,10 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             var tableDatabase = databasesHolder.HashTables[table];
             var key = hash.GetDirectBuffer();
             var value = id.GetDirectBuffer();
+
             using (var cursor = tableDatabase.OpenCursor(tx))
             {
-                if (!cursor.TryGet(ref key, ref value, CursorGetOption.GetBoth))
-                {
-                    cursor.TryPut(ref key, ref value, CursorPutOptions.AppendDuplicateData);
-                }
+                cursor.TryPut(ref key, ref value, CursorPutOptions.None);
             }
         }
 
@@ -129,6 +128,28 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
         public Span<ulong> GetSubFingerprintsByHashTableAndHash(int table, int hash)
         {
             return GetSubFingerprintsByHashTableAndHash(table, hash, tx);
+        }
+
+        public List<ulong> GetDebugList()
+        {
+            var key = (-2113196252).GetDirectBuffer();
+            var value = default(DirectBuffer);
+            var tableDatabase = databasesHolder.HashTables[0];
+            var list = new List<ulong>();
+            using (var cursor = tableDatabase.OpenCursor(tx))
+            {
+                if (cursor.TryGet(ref key, ref value, CursorGetOption.First)
+                    && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
+                {
+                    list.Add(value.ReadUInt64(0));
+
+                    while (cursor.TryGet(ref key, ref value, CursorGetOption.NextDuplicate))
+                    {
+                        list.Add(value.ReadUInt64(0));
+                    }
+                }
+            }
+            return list;
         }
     }
 }

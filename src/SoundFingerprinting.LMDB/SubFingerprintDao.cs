@@ -49,6 +49,12 @@ namespace SoundFingerprinting.LMDB
                     int table = 0;
                     foreach (var hash in hashedFingerprint.HashBins)
                     {
+                        if (hash == (-2113196252))
+                        {
+                            var test = newSubFingerprintId;
+                        }
+                        // FIXME : here the save (or read) is somehow corrupted
+                        // TODO : create repro!
                         tx.PutSubFingerprintsByHashTableAndHash(table, hash, newSubFingerprintId);
                         table++;
                     }
@@ -59,6 +65,8 @@ namespace SoundFingerprinting.LMDB
                     trackData.Subfingerprints.Add(id);
                 }
                 tx.PutTrack(trackData);
+
+                var list = tx.GetDebugList();
 
                 tx.Commit();
             }
@@ -73,6 +81,7 @@ namespace SoundFingerprinting.LMDB
                 var trackData = tx.GetTrackById(trackId);
                 if (trackData != null)
                 {
+                    // TODO : Move Subfingerprints to separate database with multiple values
                     foreach (var id in trackData.Subfingerprints)
                     {
                         var subFingerprint = tx.GetSubFingerprint(id);
@@ -98,6 +107,7 @@ namespace SoundFingerprinting.LMDB
 
         public ISet<SubFingerprintData> ReadSubFingerprints(IEnumerable<int[]> hashes, int threshold, IEnumerable<string> assignedClusters)
         {
+            // TODO : change concurrent bag to HashSet with lock (same performance, less allocations)
             var allSubs = new ConcurrentBag<SubFingerprintData>();
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {
@@ -133,7 +143,9 @@ namespace SoundFingerprinting.LMDB
             var counter = new Dictionary<ulong, int>();
             for (int table = 0; table < hashes.Length; ++table)
             {
-                foreach (var id in tx.GetSubFingerprintsByHashTableAndHash(table, hashes[table]))
+                int hashBin = hashes[table];
+                var ids = tx.GetSubFingerprintsByHashTableAndHash(table, hashBin);
+                foreach (var id in ids)
                 {
                     counter.TryGetValue(id, out var count);
                     counter[id] = count + 1;

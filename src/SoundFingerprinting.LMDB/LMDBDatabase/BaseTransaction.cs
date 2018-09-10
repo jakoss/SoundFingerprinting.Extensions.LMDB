@@ -61,32 +61,15 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             var tableDatabase = databasesHolder.HashTables[table];
             var key = hash.GetDirectBuffer();
             var value = default(DirectBuffer);
+
             ulong[] buffer = null;
-            /* FIXME : waiting for better api https://github.com/Spreads/Spreads.LMDB/issues/5
+
             if (transaction is Transaction tx)
             {
                 using (var cursor = tableDatabase.OpenCursor(tx))
                 {
-                    result = cursor.TryGet(ref key, ref value, CursorGetOption.GetMultiple);
-                }
-            }
-            else if (transaction is Spreads.LMDB.ReadOnlyTransaction rotx)
-            {
-                using (var cursor = tableDatabase.OpenReadOnlyCursor(rotx))
-                {
-                    result = cursor.TryGet(ref key, ref value, CursorGetOption.GetMultiple);
-                }
-            }
-            else
-            {
-                throw new ArgumentException("Not an Transaction object", nameof(transaction));
-            }
-            */
-            if (transaction is Transaction tx)
-            {
-                using (var cursor = tableDatabase.OpenCursor(tx))
-                {
-                    if (cursor.TryGet(ref key, ref value, CursorGetOption.First) && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
+                    if (cursor.TryGet(ref key, ref value, CursorGetOption.First)
+                        && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
                     {
                         var counter = 0;
                         buffer = new ulong[cursor.Count()];
@@ -96,7 +79,6 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
                         {
                             counter++;
                             buffer[counter] = value.ReadUInt64(0);
-                            value = default;
                         }
 
                         if (counter != (buffer.Length - 1))
@@ -110,7 +92,8 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             {
                 using (var cursor = tableDatabase.OpenReadOnlyCursor(rotx))
                 {
-                    if (cursor.TryGet(ref key, ref value, CursorGetOption.First) && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
+                    if (cursor.TryGet(ref key, ref value, CursorGetOption.First)
+                        && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
                     {
                         var counter = 0;
                         buffer = new ulong[cursor.Count()];
@@ -120,7 +103,6 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
                         {
                             counter++;
                             buffer[counter] = value.ReadUInt64(0);
-                            value = default;
                         }
 
                         if (counter != (buffer.Length - 1))
@@ -136,6 +118,9 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             }
 
             return buffer != null ? buffer : new Span<ulong>();
+
+            // FIXME : probably Visual Studio bug
+            //return buffer ?? new Span<ulong>();
         }
     }
 }

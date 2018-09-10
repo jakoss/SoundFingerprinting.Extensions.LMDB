@@ -37,11 +37,9 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
 
             var hashTables = new Database[hashTablesCount];
             var hashTableConfig = new DatabaseConfig(
-                DbFlags.Create
-                | DbFlags.IntegerKey
-                | DbFlags.DuplicatesSort
-                | DbFlags.DuplicatesFixed
-                | DbFlags.IntegerDuplicates
+                DbFlags.Create | DbFlags.DuplicatesSort
+            //| DbFlags.IntegerKey
+            //| DbFlags.IntegerDuplicates
             );
             for (int i = 0; i < hashTablesCount; i++)
             {
