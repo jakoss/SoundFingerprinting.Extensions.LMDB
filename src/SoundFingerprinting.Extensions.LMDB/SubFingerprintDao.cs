@@ -99,7 +99,6 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         public ISet<SubFingerprintData> ReadSubFingerprints(IEnumerable<int[]> hashes, int threshold, IEnumerable<string> assignedClusters)
         {
-            // TODO : change concurrent bag to HashSet with lock (same performance, less allocations)
             var allSubs = new ConcurrentBag<SubFingerprintData>();
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {

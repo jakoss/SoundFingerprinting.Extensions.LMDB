@@ -1,4 +1,4 @@
-﻿using SoundFingerprinting.Extensions.LMDB.DTO;
+using SoundFingerprinting.Extensions.LMDB.DTO;
 using Spreads.Buffers;
 using Spreads.LMDB;
 using System;
@@ -30,20 +30,24 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
         protected SubFingerprintDataDTO GetSubFingerprint(ulong id, object transaction)
         {
-            var key = id.GetDirectBuffer();
+            var subFingerprintKey = BitConverter.GetBytes(id).AsMemory();
             var value = default(DirectBuffer);
             var result = false;
-            if (transaction is Transaction tx)
+            using (subFingerprintKey.Pin())
             {
-                result = databasesHolder.SubFingerprintsDatabase.TryGet(tx, ref key, out value);
-            }
-            else if (transaction is Spreads.LMDB.ReadOnlyTransaction rotx)
-            {
-                result = databasesHolder.SubFingerprintsDatabase.TryGet(rotx, ref key, out value);
-            }
-            else
-            {
-                throw new ArgumentException("Not an Transaction object", nameof(transaction));
+                var keyBuffer = new DirectBuffer(subFingerprintKey.Span);
+                if (transaction is Transaction tx)
+                {
+                    result = databasesHolder.SubFingerprintsDatabase.TryGet(tx, ref keyBuffer, out value);
+                }
+                else if (transaction is Spreads.LMDB.ReadOnlyTransaction rotx)
+                {
+                    result = databasesHolder.SubFingerprintsDatabase.TryGet(rotx, ref keyBuffer, out value);
+                }
+                else
+                {
+                    throw new ArgumentException("Not an Transaction object", nameof(transaction));
+                }
             }
 
             if (result)
@@ -117,7 +121,11 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 throw new ArgumentException("Not an Transaction object", nameof(transaction));
             }
 
+#pragma warning disable RCS1084 // Use coalesce expression instead of conditional expression.
+#pragma warning disable IDE0029 // Use coalesce expression
             return buffer != null ? buffer : new Span<ulong>();
+#pragma warning restore IDE0029 // Use coalesce expression
+#pragma warning restore RCS1084 // Use coalesce expression instead of conditional expression.
 
             // FIXME : probably Visual Studio bug
             // return buffer ?? new Span<ulong>();

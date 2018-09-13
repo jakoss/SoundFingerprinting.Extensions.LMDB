@@ -23,7 +23,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         {
             HashTablesCount = hashTablesCount;
 
-            environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags);
+            environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags | DbEnvironmentFlags.NoMemInit);
             environment.MapSize = mapSize;
             environment.MaxDatabases = HashTablesCount + 2;
             environment.MaxReaders = 1000;
@@ -38,8 +38,8 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             var hashTables = new Database[hashTablesCount];
             var hashTableConfig = new DatabaseConfig(
                 DbFlags.Create | DbFlags.DuplicatesSort
-            //| DbFlags.IntegerKey
-            //| DbFlags.IntegerDuplicates
+                | DbFlags.IntegerKey
+                | DbFlags.IntegerDuplicates
             );
             for (int i = 0; i < hashTablesCount; i++)
             {

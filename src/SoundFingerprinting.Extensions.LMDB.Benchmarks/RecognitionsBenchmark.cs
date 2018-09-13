@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
 {
-    [MemoryDiagnoser]
+    [Config(typeof(MultipleRuntimesConfig))]
     public class RecognitionsBenchmark
     {
         private LMDBModelService lmdbModelService;
@@ -22,9 +22,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
         {
             audioService = new SoundFingerprintingAudioService();
 
-            // TODO : set NoMemInit flag
-            lmdbModelService = new LMDBModelService("db");
-            inMemoryModelService = new InMemoryModelService("memory.db");
+            lmdbModelService = new LMDBModelService(Path.Combine(Program.databasesPath, "db"));
+            inMemoryModelService = new InMemoryModelService(Path.Combine(Program.databasesPath, "memory.db"));
         }
 
         [GlobalCleanup]
