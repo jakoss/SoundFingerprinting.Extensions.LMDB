@@ -68,7 +68,7 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             {
                 using (var cursor = tableDatabase.OpenCursor(tx))
                 {
-                    if (cursor.TryGet(ref key, ref value, CursorGetOption.First)
+                    if (cursor.TryGet(ref key, ref value, CursorGetOption.Set)
                         && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
                     {
                         var counter = 0;
@@ -92,7 +92,7 @@ namespace SoundFingerprinting.LMDB.LMDBDatabase
             {
                 using (var cursor = tableDatabase.OpenReadOnlyCursor(rotx))
                 {
-                    if (cursor.TryGet(ref key, ref value, CursorGetOption.First)
+                    if (cursor.TryGet(ref key, ref value, CursorGetOption.Set)
                         && cursor.TryGet(ref key, ref value, CursorGetOption.FirstDuplicate))
                     {
                         var counter = 0;
