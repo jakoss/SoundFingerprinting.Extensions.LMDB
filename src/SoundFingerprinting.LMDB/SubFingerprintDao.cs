@@ -49,12 +49,6 @@ namespace SoundFingerprinting.LMDB
                     int table = 0;
                     foreach (var hash in hashedFingerprint.HashBins)
                     {
-                        if (hash == (-2113196252))
-                        {
-                            var test = newSubFingerprintId;
-                        }
-                        // FIXME : here the save (or read) is somehow corrupted
-                        // TODO : create repro!
                         tx.PutSubFingerprintsByHashTableAndHash(table, hash, newSubFingerprintId);
                         table++;
                     }
@@ -65,8 +59,6 @@ namespace SoundFingerprinting.LMDB
                     trackData.Subfingerprints.Add(id);
                 }
                 tx.PutTrack(trackData);
-
-                var list = tx.GetDebugList();
 
                 tx.Commit();
             }

@@ -7,12 +7,12 @@ namespace SoundFingerprinting.LMDB
     {
         public static DirectBuffer GetDirectBuffer(this ulong value)
         {
-            return new DirectBuffer(BitConverter.GetBytes(value).AsSpan());
+            return new DirectBuffer(BitConverter.GetBytes(value));
         }
 
         public static DirectBuffer GetDirectBuffer(this int value)
         {
-            return new DirectBuffer(BitConverter.GetBytes(value).AsSpan());
+            return new DirectBuffer(BitConverter.GetBytes(value));
         }
     }
 }
