@@ -1,4 +1,4 @@
-﻿namespace SoundFingerprinting.LMDB.Tests
+﻿namespace SoundFingerprinting.Extensions.LMDB.Tests
 {
     using FluentAssertions;
     using SoundFingerprinting.DAO;

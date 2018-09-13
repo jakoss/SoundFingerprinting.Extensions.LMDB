@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace SoundFingerprinting.LMDB.Benchmarks
+namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
 {
     [MemoryDiagnoser]
     public class RecognitionsBenchmark

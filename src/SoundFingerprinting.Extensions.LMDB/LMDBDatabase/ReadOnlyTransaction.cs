@@ -1,11 +1,11 @@
 ﻿using LightningDB;
-using SoundFingerprinting.LMDB.DTO;
+using SoundFingerprinting.Extensions.LMDB.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ZeroFormatter;
 
-namespace SoundFingerprinting.LMDB.LMDBDatabase
+namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
     internal class ReadOnlyTransaction : IDisposable
     {

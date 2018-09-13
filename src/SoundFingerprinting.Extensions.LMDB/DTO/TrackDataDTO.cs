@@ -3,7 +3,7 @@ using SoundFingerprinting.DAO.Data;
 using System.Collections.Generic;
 using ZeroFormatter;
 
-namespace SoundFingerprinting.LMDB.DTO
+namespace SoundFingerprinting.Extensions.LMDB.DTO
 {
     [ZeroFormattable]
     public class TrackDataDTO

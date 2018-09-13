@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoundFingerprinting.LMDB\SoundFingerprinting.LMDB.csproj" />
+    <ProjectReference Include="..\SoundFingerprinting.Extensions.LMDB\SoundFingerprinting.Extensions.LMDB.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,5 +30,4 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
 </Project>

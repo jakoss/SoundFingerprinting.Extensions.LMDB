@@ -1,6 +1,6 @@
 # SoundFingerprinting.LMDB
 
-[![NuGet](https://img.shields.io/nuget/v/SoundFingerprinting.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.LMDB/1.0.0) [![NuGet](https://img.shields.io/nuget/dt/SoundFingerprinting.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.LMDB/1.0.0) [![GitHub issues](https://img.shields.io/github/issues/Nekromancer/SoundFingerprinting.LMDB.svg?style=flat-square)](https://github.com/Nekromancer/SoundFingerprinting.LMDB/issues) [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![NuGet](https://img.shields.io/nuget/v/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.Extensions.LMDB/1.0.0) [![NuGet](https://img.shields.io/nuget/dt/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.Extensions.LMDB/1.0.0) [![GitHub issues](https://img.shields.io/github/issues/Nekromancer/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB/issues) [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 
 
@@ -8,16 +8,16 @@ Database adapter for SoundFingerprinting algorithm using LMDB database. It's fas
 
 ## Usage
 
-To get library simply install it from [Nuget](https://www.nuget.org/packages/SoundFingerprinting.LMDB/1.0.0):
+To get library simply install it from [Nuget](https://www.nuget.org/packages/SoundFingerprinting.Extensions.LMDB):
 
 ```
-Install-Package SoundFingerprinting.LMDB
+Install-Package SoundFingerprinting.Extensions.LMDB
 ```
 
 or using `dotnet cli`
 
 ```
-dotnet add package SoundFingerprinting.LMDB
+dotnet add package SoundFingerprinting.Extensions.LMDB
 ```
 
 To use LMDB database with SoundFingerprinting create `LMDBModelService` object and use it in algorithm, like this:

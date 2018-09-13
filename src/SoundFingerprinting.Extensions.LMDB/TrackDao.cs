@@ -1,12 +1,12 @@
 ﻿using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
-using SoundFingerprinting.LMDB.DTO;
-using SoundFingerprinting.LMDB.LMDBDatabase;
+using SoundFingerprinting.Extensions.LMDB.DTO;
+using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SoundFingerprinting.LMDB
+namespace SoundFingerprinting.Extensions.LMDB
 {
     internal class TrackDao : ITrackDao
     {

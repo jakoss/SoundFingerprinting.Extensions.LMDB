@@ -1,11 +1,11 @@
 ﻿using LightningDB;
-using SoundFingerprinting.LMDB.LMDBDatabase;
+using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
 using System;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("SoundFingerprinting.LMDB.Tests")]
+[assembly: InternalsVisibleTo("SoundFingerprinting.Extensions.LMDB.Tests")]
 
-namespace SoundFingerprinting.LMDB
+namespace SoundFingerprinting.Extensions.LMDB
 {
     public class LMDBModelService : ModelService, IDisposable
     {
