@@ -11,6 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoundFingerprinting.LMDB\SoundFingerprinting.LMDB.csproj" />
+    <ProjectReference Include="..\SoundFingerprinting.Extensions.LMDB\SoundFingerprinting.Extensions.LMDB.csproj" />
   </ItemGroup>
 </Project>

@@ -1,15 +1,15 @@
 ﻿using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
 using SoundFingerprinting.Data;
-using SoundFingerprinting.LMDB.DTO;
-using SoundFingerprinting.LMDB.LMDBDatabase;
+using SoundFingerprinting.Extensions.LMDB.DTO;
+using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SoundFingerprinting.LMDB
+namespace SoundFingerprinting.Extensions.LMDB
 {
     internal class SubFingerprintDao : ISubFingerprintDao
     {

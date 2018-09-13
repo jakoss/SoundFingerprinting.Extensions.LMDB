@@ -1,9 +1,9 @@
-﻿using SoundFingerprinting.LMDB.DTO;
+﻿using SoundFingerprinting.Extensions.LMDB.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SoundFingerprinting.LMDB.LMDBDatabase
+namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
     internal class ReadOnlyTransaction : BaseTransaction, IDisposable
     {

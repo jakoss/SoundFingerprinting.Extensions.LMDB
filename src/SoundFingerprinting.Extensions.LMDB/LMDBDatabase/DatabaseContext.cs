@@ -1,9 +1,9 @@
-﻿using SoundFingerprinting.LMDB.DTO;
+﻿using SoundFingerprinting.Extensions.LMDB.DTO;
 using Spreads.LMDB;
 using System;
 using ZeroFormatter;
 
-namespace SoundFingerprinting.LMDB.LMDBDatabase
+namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
     internal sealed class DatabaseContext : IDisposable
     {

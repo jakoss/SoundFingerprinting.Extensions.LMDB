@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace SoundFingerprinting.LMDB.Tests.Integration
+namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 {
     public class LMDBModelServiceTest : AbstractTest, IDisposable
     {

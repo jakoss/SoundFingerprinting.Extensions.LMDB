@@ -4,9 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Jakub Syty</Authors>
     <Company>EUVIC</Company>
-    <PackageProjectUrl>https://github.com/Nekromancer/SoundFingerprinting.LMDB</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/Nekromancer/SoundFingerprinting.LMDB/blob/master/LICENSE</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/Nekromancer/SoundFingerprinting.LMDB</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>soundfingerprinting database lmdb</PackageTags>
     <Description>Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.</Description>

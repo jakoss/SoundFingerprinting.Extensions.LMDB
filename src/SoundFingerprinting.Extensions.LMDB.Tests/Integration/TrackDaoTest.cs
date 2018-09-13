@@ -3,7 +3,7 @@ using SoundFingerprinting.Audio;
 using SoundFingerprinting.Builder;
 using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
-using SoundFingerprinting.LMDB.LMDBDatabase;
+using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
 using SoundFingerprinting.Strides;
 
 using System;
@@ -13,7 +13,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace SoundFingerprinting.LMDB.Tests.Integration
+namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 {
     public class TrackDaoFact : IntegrationWithSampleFilesTest, IDisposable
     {

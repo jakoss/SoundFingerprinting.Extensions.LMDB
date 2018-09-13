@@ -6,7 +6,7 @@ using SoundFingerprinting.InMemory;
 using System;
 using System.IO;
 
-namespace SoundFingerprinting.LMDB.Benchmarks
+namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
 {
     internal static class Program
     {

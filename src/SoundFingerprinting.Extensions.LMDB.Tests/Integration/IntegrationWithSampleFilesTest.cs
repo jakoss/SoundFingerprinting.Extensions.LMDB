@@ -1,4 +1,4 @@
-﻿namespace SoundFingerprinting.LMDB.Tests.Integration
+﻿namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 {
     using Audio;
     using Data;

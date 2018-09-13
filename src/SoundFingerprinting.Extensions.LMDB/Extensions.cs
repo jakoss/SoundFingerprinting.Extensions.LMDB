@@ -1,7 +1,7 @@
 ﻿using Spreads.Buffers;
 using System;
 
-namespace SoundFingerprinting.LMDB
+namespace SoundFingerprinting.Extensions.LMDB
 {
     internal static class Extensions
     {

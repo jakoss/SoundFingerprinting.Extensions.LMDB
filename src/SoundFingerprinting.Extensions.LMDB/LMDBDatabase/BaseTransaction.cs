@@ -1,11 +1,11 @@
-﻿using SoundFingerprinting.LMDB.DTO;
+﻿using SoundFingerprinting.Extensions.LMDB.DTO;
 using Spreads.Buffers;
 using Spreads.LMDB;
 using System;
 using System.Collections.Generic;
 using ZeroFormatter;
 
-namespace SoundFingerprinting.LMDB.LMDBDatabase
+namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
     internal class BaseTransaction
     {
