@@ -73,6 +73,7 @@ namespace SoundFingerprinting.Extensions.LMDB
                 var trackData = tx.GetTrackById(trackId);
                 if (trackData != null)
                 {
+                    // TODO : Move Subfingerprints to separate database with multiple values
                     foreach (var id in trackData.Subfingerprints)
                     {
                         var subFingerprint = tx.GetSubFingerprint(id);
@@ -98,6 +99,7 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         public ISet<SubFingerprintData> ReadSubFingerprints(IEnumerable<int[]> hashes, int threshold, IEnumerable<string> assignedClusters)
         {
+            // TODO : change concurrent bag to HashSet with lock (same performance, less allocations)
             var allSubs = new ConcurrentBag<SubFingerprintData>();
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {
@@ -130,30 +132,19 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         private IEnumerable<ulong> GetSubFingerprintMatches(int[] hashes, int thresholdVotes, ReadOnlyTransaction tx)
         {
-            var results = new List<ulong>[hashes.Length];
+            var counter = new Dictionary<ulong, int>();
             for (int table = 0; table < hashes.Length; ++table)
             {
                 int hashBin = hashes[table];
-                results[table] = tx.GetSubFingerprintsByHashTableAndHash(table, hashBin);
-            }
-
-            return GroupByAndCount(results, thresholdVotes);
-        }
-
-        private IEnumerable<ulong> GroupByAndCount(List<ulong>[] subFingerprints, int threshold)
-        {
-            var counter = new Dictionary<ulong, int>();
-            for (int i = 0; i < subFingerprints.Length; ++i)
-            {
-                for (int j = 0; j < subFingerprints[i].Count; ++j)
+                var ids = tx.GetSubFingerprintsByHashTableAndHash(table, hashBin);
+                foreach (var id in ids)
                 {
-                    ulong key = subFingerprints[i][j];
-                    counter.TryGetValue(key, out var count);
-                    counter[key] = count + 1;
+                    counter.TryGetValue(id, out var count);
+                    counter[id] = count + 1;
                 }
             }
 
-            return counter.Where(pair => pair.Value >= threshold).Select(p => p.Key);
+            return counter.Where(pair => pair.Value >= thresholdVotes).Select(p => p.Key);
         }
     }
 }

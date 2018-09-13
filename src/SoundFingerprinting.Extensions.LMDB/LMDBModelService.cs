@@ -1,5 +1,5 @@
-﻿using LightningDB;
-using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
+﻿using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
+using Spreads.LMDB;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -14,7 +14,7 @@ namespace SoundFingerprinting.Extensions.LMDB
         // Default map size is 10 GB
         public LMDBModelService(string pathToDatabase,
             long mapSize = (1024L * 1024L * 1024L * 10L),
-            EnvironmentOpenFlags lmdbOpenFlags = EnvironmentOpenFlags.None
+            DbEnvironmentFlags lmdbOpenFlags = DbEnvironmentFlags.None
         ) : this(new DatabaseContext(pathToDatabase, mapSize, lmdbOpenFlags))
 
         {
@@ -32,7 +32,7 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
         {

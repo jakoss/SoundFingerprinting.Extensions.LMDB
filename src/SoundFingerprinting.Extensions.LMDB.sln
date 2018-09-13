@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundFingerprinting.Extensi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundFingerprinting.Extensions.LMDB.Tests", "SoundFingerprinting.Extensions.LMDB.Tests\SoundFingerprinting.Extensions.LMDB.Tests.csproj", "{8E6EB152-EA64-4312-BA22-10CAFB497A59}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundFingerprinting.Extensions.LMDB.Benchmarks", "SoundFingerprinting.Extensions.LMDB.Benchmarks\SoundFingerprinting.Extensions.LMDB.Benchmarks.csproj", "{8BC34222-838E-4DA1-B9E8-3811D7759EC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundFingerprinting.Extensions.LMDB.Benchmarks", "SoundFingerprinting.Extensions.LMDB.Benchmarks\SoundFingerprinting.Extensions.LMDB.Benchmarks.csproj", "{8BC34222-838E-4DA1-B9E8-3811D7759EC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,87 +1,86 @@
-﻿using LightningDB;
-using SoundFingerprinting.Extensions.LMDB.DTO;
+﻿using SoundFingerprinting.Extensions.LMDB.DTO;
+using Spreads.Buffers;
+using Spreads.LMDB;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using ZeroFormatter;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
-    internal class ReadWriteTransaction : ReadOnlyTransaction
+    internal class ReadWriteTransaction : BaseTransaction, IDisposable
     {
         private static readonly object locker = new object();
+        private readonly Transaction tx;
+        private readonly DatabasesHolder databasesHolder;
 
-        public ReadWriteTransaction(LightningTransaction tx, DatabasesHolder databasesHolder) : base(tx, databasesHolder)
+        public ReadWriteTransaction(Transaction tx, DatabasesHolder databasesHolder)
+            : base(databasesHolder)
         {
             Monitor.Enter(locker);
+            this.tx = tx;
+            this.databasesHolder = databasesHolder;
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
-            base.Dispose();
+            tx.Dispose();
             Monitor.Exit(locker);
         }
 
         public ulong GetLastTrackId()
         {
-            ulong newTrackId = 0;
-            using (var cursor = tx.CreateCursor(databasesHolder.TracksDatabase))
+            ulong lastTrackId = 0;
+            using (var cursor = databasesHolder.TracksDatabase.OpenCursor(tx))
             {
-                if (cursor.MoveToLast())
+                DirectBuffer key = default;
+                DirectBuffer value = default;
+                if (cursor.TryGet(ref key, ref value, CursorGetOption.Last))
                 {
-                    newTrackId = BitConverter.ToUInt64(cursor.Current.Key, 0);
+                    lastTrackId = key.ReadUInt64(0);
                 }
             }
-            return newTrackId;
+            return lastTrackId;
         }
 
         public ulong GetLastSubFingerprintId()
         {
-            ulong newSubFingerprintId = 0;
-            using (var cursor = tx.CreateCursor(databasesHolder.SubFingerprintsDatabase))
+            ulong lastSubFingerprintId = 0;
+            using (var cursor = databasesHolder.SubFingerprintsDatabase.OpenCursor(tx))
             {
-                if (cursor.MoveToLast())
+                var key = default(DirectBuffer);
+                var value = default(DirectBuffer);
+                if (cursor.TryGet(ref key, ref value, CursorGetOption.Last))
                 {
-                    newSubFingerprintId = BitConverter.ToUInt64(cursor.Current.Key, 0);
+                    lastSubFingerprintId = key.ReadUInt64(0);
                 }
             }
-            return newSubFingerprintId;
+            return lastSubFingerprintId;
         }
 
         public void PutSubFingerprint(SubFingerprintDataDTO subFingerprintDataDTO)
         {
-            var subFingerprintKey = BitConverter.GetBytes(subFingerprintDataDTO.SubFingerprintReference);
-            var bytes = ZeroFormatterSerializer.Serialize(subFingerprintDataDTO);
-            tx.Put(databasesHolder.SubFingerprintsDatabase, subFingerprintKey, bytes);
+            var subFingerprintKey = subFingerprintDataDTO.SubFingerprintReference.GetDirectBuffer();
+            var value = new DirectBuffer(ZeroFormatterSerializer.Serialize(subFingerprintDataDTO));
+            databasesHolder.SubFingerprintsDatabase.Put(tx, ref subFingerprintKey, ref value);
         }
 
         public void PutSubFingerprintsByHashTableAndHash(int table, int hash, ulong id)
         {
-            var hashTable = databasesHolder.HashTables[table];
-            var key = BitConverter.GetBytes(hash);
-            var value = tx.Get(hashTable, key);
-            List<ulong> hashBin;
-            if (value == null)
+            var tableDatabase = databasesHolder.HashTables[table];
+            var key = hash;
+            var value = id;
+
+            using (var cursor = tableDatabase.OpenCursor(tx))
             {
-                hashBin = new List<ulong>();
+                cursor.TryPut(ref key, ref value, CursorPutOptions.None);
             }
-            else
-            {
-                hashBin = Enumerable.Range(0, value.Length / sizeof(ulong))
-                    .Select(i => BitConverter.ToUInt64(value, i * sizeof(ulong)))
-                    .ToList();
-            }
-            hashBin.Add(id);
-            var hashBinBytes = hashBin.SelectMany(BitConverter.GetBytes).ToArray();
-            tx.Put(hashTable, key, hashBinBytes);
         }
 
         public void PutTrack(TrackDataDTO trackDataDTO)
         {
-            var trackKey = BitConverter.GetBytes(trackDataDTO.TrackReference);
-            var trackValue = ZeroFormatterSerializer.Serialize(trackDataDTO);
-            tx.Put(databasesHolder.TracksDatabase, trackKey, trackValue);
+            var trackKey = trackDataDTO.TrackReference.GetDirectBuffer();
+            var trackValue = new DirectBuffer(ZeroFormatterSerializer.Serialize(trackDataDTO));
+            databasesHolder.TracksDatabase.Put(tx, ref trackKey, ref trackValue);
 
             if (!databasesHolder.Tracks.ContainsKey(trackDataDTO.TrackReference))
             {
@@ -91,40 +90,43 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
         public void RemoveTrack(TrackDataDTO trackDataDTO)
         {
-            var trackKey = BitConverter.GetBytes(trackDataDTO.TrackReference);
-            tx.Delete(databasesHolder.TracksDatabase, trackKey);
+            var trackKey = trackDataDTO.TrackReference.GetDirectBuffer();
+            databasesHolder.TracksDatabase.Delete(tx, ref trackKey);
             databasesHolder.Tracks.Remove(trackDataDTO.TrackReference);
         }
 
         public void RemoveSubFingerprint(SubFingerprintDataDTO subFingerprintDataDTO)
         {
-            var subFingerprintKey = BitConverter.GetBytes(subFingerprintDataDTO.SubFingerprintReference);
-            tx.Delete(databasesHolder.SubFingerprintsDatabase, subFingerprintKey);
+            var subFingerprintKey = subFingerprintDataDTO.SubFingerprintReference.GetDirectBuffer();
+            databasesHolder.SubFingerprintsDatabase.Delete(tx, ref subFingerprintKey);
         }
 
         public void RemoveSubFingerprintsByHashTableAndHash(int table, int hash, ulong id)
         {
             var tableDatabase = databasesHolder.HashTables[table];
-            var hashKey = BitConverter.GetBytes(hash);
-            var idsValue = tx.Get(tableDatabase, hashKey);
-            if (idsValue == null) return;
+            var hashKey = hash;
+            var value = id;
 
-            var ids = Enumerable.Range(0, idsValue.Length / sizeof(ulong))
-                .Select(i => BitConverter.ToUInt64(idsValue, i * sizeof(ulong)))
-                .ToList();
-            if (ids.Remove(id))
+            using (var cursor = tableDatabase.OpenCursor(tx))
             {
-                tx.Put(tableDatabase, hashKey, ids.SelectMany(BitConverter.GetBytes).ToArray());
-            }
-            else
-            {
-                throw new Exception("Couldn't remove subFingerprintId from hash table");
+                if (cursor.TryGet(ref hashKey, ref value, CursorGetOption.GetBoth))
+                    cursor.Delete(false);
             }
         }
 
         public void Commit()
         {
             tx.Commit();
+        }
+
+        public SubFingerprintDataDTO GetSubFingerprint(ulong id)
+        {
+            return GetSubFingerprint(id, tx);
+        }
+
+        public Span<ulong> GetSubFingerprintsByHashTableAndHash(int table, int hash)
+        {
+            return GetSubFingerprintsByHashTableAndHash(table, hash, tx);
         }
     }
 }
