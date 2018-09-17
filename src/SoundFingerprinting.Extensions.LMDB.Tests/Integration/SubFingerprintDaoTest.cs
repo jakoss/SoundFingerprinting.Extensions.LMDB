@@ -70,7 +70,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void SameNumberOfHashBinsIsInsertedInAllTablesWhenFingerprintingEntireSongTest()
         {
-            var track = new TrackData(GetTagInfo());
+            var track = new TrackData(GetTagInfo(1));
             var trackReference = trackDao.InsertTrack(track);
             var hashedFingerprints = fingerprintCommandBuilder
                 .BuildFingerprintCommand()
@@ -92,9 +92,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void ReadByTrackGroupIdWorksAsExpectedTest()
         {
-            TagInfo tagInfo = GetTagInfo();
-            TrackData firstTrack = new TrackData(tagInfo);
-            TrackData secondTrack = new TrackData(tagInfo);
+            TrackData firstTrack = new TrackData(GetTagInfo(1));
+            TrackData secondTrack = new TrackData(GetTagInfo(2));
 
             var firstTrackReference = trackDao.InsertTrack(firstTrack);
             var secondTrackReference = trackDao.InsertTrack(secondTrack);
@@ -152,7 +151,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void ReadHashDataByTrackTest()
         {
-            var firstTrack = new TrackData("isrc", "artist", "title", "album", 2012, 200);
+            var firstTrack = new TrackData("isrc1", "artist", "title", "album", 2012, 200);
 
             var firstTrackReference = trackDao.InsertTrack(firstTrack);
 
@@ -165,7 +164,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
             InsertHashedFingerprintsForTrack(firstHashData, firstTrackReference);
 
-            var secondTrack = new TrackData("isrc", "artist", "title", "album", 2012, 200);
+            var secondTrack = new TrackData("isrc2", "artist", "title", "album", 2012, 200);
 
             var secondTrackReference = trackDao.InsertTrack(secondTrack);
 

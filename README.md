@@ -44,7 +44,17 @@ using(var modelService = new LMDBModelService("db")){
 ```
 Parameter of `LMDBModelService` constructor is path to directory. LMDB will create its files in this directory.
 
+You need to build your application targeting x64 architecture, since LMDB supports only that. On x32 you will encounter runtime errors!
+
 It's **VERY** important to dispose modelService after usage (although it's best to keep instance for whole application life and dispose it on application closing). Not doing it might cause memory dump, which tries to dump whole VirtualMemory of process. Memory Mapped File is part of VirtualMemory, so it will be dumped as well. That might result in system getting unresponsive for even a couple of minutes!
+
+## Updates
+
+Version **5.2.2.3** brings totally new LMDB .NET wrapper. It uses `Span` and `Memory` constructs to bring zero-copy reads from LMDB library. This means whole new level of optimization in .NET Core 2.1 (and newer) runtimes. It still work on .NET Framework, but it doesn't have these optimizations implemented. Optimizations are mainly in allocation counts. Older version on single recognition could allocate even 250 MB. New version does the same little bit faster while allocating only 1.5 KB!
+
+Please note that this new .NET wrapper is in preview now. **It require MyGet feed** in NuGet configuration to get it's dependencies. I'm using it in production and i do not note any problems with stability so far.
+
+Version **5.2.2.3** is **NOT** backwards compatibile in any way. You'll need to rebuild database from the ground after the update.
 
 ## Technical details
 

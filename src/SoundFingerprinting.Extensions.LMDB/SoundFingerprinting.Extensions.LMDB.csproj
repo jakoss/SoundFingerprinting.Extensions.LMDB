@@ -10,9 +10,22 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>soundfingerprinting database lmdb</PackageTags>
     <Description>Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.</Description>
-    <Version>5.2.2.2</Version>
+    <Version>5.2.2.3-beta1</Version>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageReleaseNotes>Version 5.2.2.3 brings totally new LMDB .NET wrapper. It uses Span and Memory constructs to bring zero-copy reads from LMDB library. This means whole new level of optimization in .NET Core 2.1 (and newer) runtimes. It still work on .NET Framework, but it doesn't have these optimizations implemented. Optimizations are mainly in allocation counts. Older version on single recognition could allocate even 250 MB. New version does the same little bit faster while allocating only 1.5 KB!
+
+Please note that this new .NET wrapper is in preview now. It require MyGet feed in NuGet configuration to get it's dependencies. I'm using it in production and i do not note any problems with stability so far.
+
+Version 5.2.2.3 is NOT backwards compatibile in any way. You'll need to rebuild database from the ground after the update.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>

@@ -26,24 +26,19 @@ namespace SoundFingerprinting.Extensions.LMDB
                 var trackData = tx.GetTrackById(trackId);
                 if (trackData == null) throw new Exception("Track not found");
 
-                if (trackData.Subfingerprints?.Count > 0)
+                foreach (var subFingerprint in tx.GetSubFingerprintsForTrack(trackId))
                 {
-                    foreach (var subFingerprintId in trackData.Subfingerprints)
+                    // Remove hashes from hashTable
+                    int table = 0;
+                    foreach (var hash in subFingerprint.Hashes)
                     {
-                        var subFingerprint = tx.GetSubFingerprint(subFingerprintId);
-
-                        // Remove hashes from hashTable
-                        int table = 0;
-                        foreach (var hash in subFingerprint.Hashes)
-                        {
-                            tx.RemoveSubFingerprintsByHashTableAndHash(table, hash, subFingerprint.SubFingerprintReference);
-                            count++;
-                            table++;
-                        }
-
-                        tx.RemoveSubFingerprint(subFingerprint);
+                        tx.RemoveSubFingerprintsByHashTableAndHash(table, hash, subFingerprint.SubFingerprintReference);
                         count++;
+                        table++;
                     }
+
+                    tx.RemoveSubFingerprint(subFingerprint);
+                    count++;
                 }
 
                 tx.RemoveTrack(trackData);

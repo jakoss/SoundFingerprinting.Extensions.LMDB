@@ -1,7 +1,5 @@
-﻿using SoundFingerprinting.Extensions.LMDB.DTO;
-using Spreads.LMDB;
+﻿using Spreads.LMDB;
 using System;
-using ZeroFormatter;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
@@ -11,6 +9,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
         private readonly LMDBEnvironment environment;
         private readonly DatabasesHolder databasesHolder;
+        private readonly IndexesHolder indexesHolder;
 
         public DatabaseContext(string pathToDatabase,
             long mapSize = (1024L * 1024L * 1024L * 10L),
@@ -25,7 +24,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
             environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags | DbEnvironmentFlags.NoMemInit);
             environment.MapSize = mapSize;
-            environment.MaxDatabases = HashTablesCount + 2;
+            environment.MaxDatabases = HashTablesCount + 5;
             environment.MaxReaders = 1000;
             environment.Open();
 
@@ -37,7 +36,8 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
             var hashTables = new Database[hashTablesCount];
             var hashTableConfig = new DatabaseConfig(
-                DbFlags.Create | DbFlags.DuplicatesSort
+                DbFlags.Create
+                | DbFlags.DuplicatesSort
                 | DbFlags.IntegerKey
                 | DbFlags.IntegerDuplicates
             );
@@ -47,36 +47,34 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             }
 
             databasesHolder = new DatabasesHolder(tracksDatabase, subFingerprintsDatabase, hashTables);
-            ReadAllTracks();
+
+            // Open all databases for indexes
+            var isrcIndex = environment.OpenDatabase("isrcIndex", new DatabaseConfig(DbFlags.Create));
+            var titleArtistIndex = environment.OpenDatabase("titleArtistIndex", new DatabaseConfig(DbFlags.Create | DbFlags.DuplicatesSort));
+            var tracksSubfingerprintsIndex = environment.OpenDatabase("tracksSubfingerprintsIndex", new DatabaseConfig(
+                DbFlags.Create
+                | DbFlags.DuplicatesSort
+                | DbFlags.IntegerKey
+                | DbFlags.IntegerDuplicates
+            ));
+            indexesHolder = new IndexesHolder(isrcIndex, titleArtistIndex, tracksSubfingerprintsIndex);
         }
 
         public ReadOnlyTransaction OpenReadOnlyTransaction()
         {
-            return new ReadOnlyTransaction(environment.BeginReadOnlyTransaction(), databasesHolder);
+            return new ReadOnlyTransaction(environment.BeginReadOnlyTransaction(), databasesHolder, indexesHolder);
         }
 
         public ReadWriteTransaction OpenReadWriteTransaction()
         {
-            return new ReadWriteTransaction(environment.BeginTransaction(), databasesHolder);
+            return new ReadWriteTransaction(environment.BeginTransaction(), databasesHolder, indexesHolder);
         }
 
         public void Dispose()
         {
             databasesHolder.Dispose();
+            indexesHolder.Dispose();
             environment.Dispose();
-        }
-
-        private void ReadAllTracks()
-        {
-            environment.Read(tx =>
-            {
-                foreach (var item in databasesHolder.TracksDatabase.AsEnumerable(tx))
-                {
-                    var key = item.Key.ReadUInt64(0);
-                    var trackData = ZeroFormatterSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray());
-                    databasesHolder.Tracks.Add(key, trackData);
-                }
-            });
         }
     }
 }

@@ -54,12 +54,6 @@ namespace SoundFingerprinting.Extensions.LMDB
                     }
                 }
 
-                foreach (var id in newIds)
-                {
-                    trackData.Subfingerprints.Add(id);
-                }
-                tx.PutTrack(trackData);
-
                 tx.Commit();
             }
         }
@@ -68,22 +62,15 @@ namespace SoundFingerprinting.Extensions.LMDB
         {
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {
-                var trackId = (ulong)trackReference.Id;
                 var result = new List<HashedFingerprint>();
-                var trackData = tx.GetTrackById(trackId);
-                if (trackData != null)
+                foreach (var subFingerprint in tx.GetSubFingerprintsForTrack((ulong)trackReference.Id))
                 {
-                    // TODO : Move Subfingerprints to separate database with multiple values
-                    foreach (var id in trackData.Subfingerprints)
-                    {
-                        var subFingerprint = tx.GetSubFingerprint(id);
-                        result.Add(new HashedFingerprint(
-                            subFingerprint.Hashes,
-                            subFingerprint.SequenceNumber,
-                            subFingerprint.SequenceAt,
-                            subFingerprint.Clusters
-                        ));
-                    }
+                    result.Add(new HashedFingerprint(
+                        subFingerprint.Hashes,
+                        subFingerprint.SequenceNumber,
+                        subFingerprint.SequenceAt,
+                        subFingerprint.Clusters
+                    ));
                 }
                 return result;
             }

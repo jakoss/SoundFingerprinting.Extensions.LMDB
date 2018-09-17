@@ -1,7 +1,5 @@
-﻿using SoundFingerprinting.Extensions.LMDB.DTO;
-using Spreads.LMDB;
+﻿using Spreads.LMDB;
 using System;
-using System.Collections.Generic;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
@@ -17,8 +15,6 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         public Database TracksDatabase { get; }
         public Database SubFingerprintsDatabase { get; }
         public Database[] HashTables { get; }
-
-        public readonly IDictionary<ulong, TrackDataDTO> Tracks = new Dictionary<ulong, TrackDataDTO>();
 
         public void Dispose()
         {

@@ -32,7 +32,7 @@
             }
         }
 
-        protected TagInfo GetTagInfo()
+        protected TagInfo GetTagInfo(int number)
         {
             return new TagInfo
             {
@@ -43,7 +43,7 @@
                 Duration = 10.0d,
                 Genre = "Genre",
                 IsEmpty = false,
-                ISRC = "ISRC",
+                ISRC = $"ISRC{number}",
                 Title = "Nocture",
                 Year = 1857
             };

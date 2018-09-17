@@ -1,6 +1,5 @@
 ﻿using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
-using System.Collections.Generic;
 using ZeroFormatter;
 
 namespace SoundFingerprinting.Extensions.LMDB.DTO
@@ -17,7 +16,6 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             ReleaseYear = trackData.ReleaseYear;
             Length = trackData.Length;
             TrackReference = (ulong)modelReference.Id;
-            Subfingerprints = new HashSet<ulong>();
         }
 
         public TrackDataDTO()
@@ -46,9 +44,6 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
 
         [Index(7)]
         public virtual ulong TrackReference { get; internal set; }
-
-        [Index(8)]
-        public virtual HashSet<ulong> Subfingerprints { get; internal set; }
 
         internal TrackData ToTrackData()
         {

@@ -49,9 +49,6 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             var trackReference = trackDao.InsertTrack(track);
 
             AssertModelReferenceIsInitialized(trackReference);
-
-            // FIXME : https://github.com/AddictedCS/soundfingerprinting/issues/98
-            // AssertModelReferenceIsInitialized(track.TrackReference);
         }
 
         [Fact]
@@ -60,7 +57,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             var modelReferences = new ConcurrentBag<IModelReference>();
             for (int i = 0; i < 1000; i++)
             {
-                var modelReference = trackDao.InsertTrack(new TrackData("isrc", "artist", "title", "album", 2012, 200));
+                var modelReference = trackDao.InsertTrack(new TrackData($"isrc{i}", "artist", "title", "album", 2012, 200));
 
                 modelReferences.Should().NotContain(modelReference);
                 modelReferences.Add(modelReference);
@@ -172,7 +169,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void DeleteHashBinsAndSubfingerprintsOnTrackDelete()
         {
-            TagInfo tagInfo = GetTagInfo();
+            TagInfo tagInfo = GetTagInfo(1);
             int releaseYear = tagInfo.Year;
             var track = new TrackData(tagInfo.ISRC, tagInfo.Artist, tagInfo.Title, tagInfo.Album, releaseYear, (int)tagInfo.Duration);
             var trackReference = trackDao.InsertTrack(track);
@@ -204,7 +201,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void InserTrackShouldAcceptEmptyEntriesCodes()
         {
-            TrackData track = new TrackData(string.Empty, string.Empty, string.Empty, string.Empty, 1986, 200);
+            TrackData track = new TrackData("isrc", string.Empty, string.Empty, string.Empty, 1986, 200);
             var trackReference = trackDao.InsertTrack(track);
 
             var actualTrack = trackDao.ReadTrack(trackReference);

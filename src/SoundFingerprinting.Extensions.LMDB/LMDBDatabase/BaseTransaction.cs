@@ -10,21 +10,41 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
     internal class BaseTransaction
     {
         private readonly DatabasesHolder databasesHolder;
+        private readonly IndexesHolder indexesHolder;
 
-        public BaseTransaction(DatabasesHolder databasesHolder)
+        public BaseTransaction(DatabasesHolder databasesHolder, IndexesHolder indexesHolder)
         {
             this.databasesHolder = databasesHolder;
+            this.indexesHolder = indexesHolder;
         }
 
-        public TrackDataDTO GetTrackById(ulong id)
+        protected TrackDataDTO GetTrackById(ref DirectBuffer id, object transaction)
         {
-            if (databasesHolder.Tracks.TryGetValue(id, out var trackData))
+            if (transaction is Transaction tx)
             {
-                return trackData;
+                if (databasesHolder.TracksDatabase.TryGet(tx, ref id, out DirectBuffer value))
+                {
+                    return ZeroFormatterSerializer.Deserialize<TrackDataDTO>(value.Span.ToArray());
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if (transaction is Spreads.LMDB.ReadOnlyTransaction rotx)
+            {
+                if (databasesHolder.TracksDatabase.TryGet(rotx, ref id, out DirectBuffer value))
+                {
+                    return ZeroFormatterSerializer.Deserialize<TrackDataDTO>(value.Span.ToArray());
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {
-                return null;
+                throw new ArgumentException("Not an Transaction object", nameof(transaction));
             }
         }
 
@@ -58,6 +78,60 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             {
                 throw new KeyNotFoundException();
             }
+        }
+
+        protected List<SubFingerprintDataDTO> GetSubFingerprintsForTrack(ulong id, object transaction)
+        {
+            var trackKey = BitConverter.GetBytes(id).AsMemory();
+            var list = new List<SubFingerprintDataDTO>();
+
+            if (transaction is Transaction tx)
+            {
+                using (trackKey.Pin())
+                using (var cursor = indexesHolder.TracksSubfingerprintsIndex.OpenCursor(tx))
+                {
+                    var keyBuffer = new DirectBuffer(trackKey.Span);
+                    var valueBuffer = default(DirectBuffer);
+                    if (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.Set)
+                        && cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.FirstDuplicate))
+                    {
+                        var subFingerprintId = valueBuffer.ReadUInt64(0);
+                        list.Add(GetSubFingerprint(subFingerprintId, tx));
+
+                        while (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.NextDuplicate))
+                        {
+                            subFingerprintId = valueBuffer.ReadUInt64(0);
+                            list.Add(GetSubFingerprint(subFingerprintId, tx));
+                        }
+                    }
+                }
+            }
+            else if (transaction is Spreads.LMDB.ReadOnlyTransaction rotx)
+            {
+                using (trackKey.Pin())
+                using (var cursor = indexesHolder.TracksSubfingerprintsIndex.OpenReadOnlyCursor(rotx))
+                {
+                    var keyBuffer = new DirectBuffer(trackKey.Span);
+                    var valueBuffer = default(DirectBuffer);
+                    if (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.Set)
+                        && cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.FirstDuplicate))
+                    {
+                        var subFingerprintId = valueBuffer.ReadUInt64(0);
+                        list.Add(GetSubFingerprint(subFingerprintId, rotx));
+
+                        while (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.NextDuplicate))
+                        {
+                            subFingerprintId = valueBuffer.ReadUInt64(0);
+                            list.Add(GetSubFingerprint(subFingerprintId, rotx));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Not an Transaction object", nameof(transaction));
+            }
+            return list;
         }
 
         protected Span<ulong> GetSubFingerprintsByHashTableAndHash(int table, int hash, object transaction)
