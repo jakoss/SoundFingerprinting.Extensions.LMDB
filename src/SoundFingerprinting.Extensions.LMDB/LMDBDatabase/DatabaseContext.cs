@@ -26,7 +26,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             {
                 lmdbOpenFlags = lmdbOpenFlags | DbEnvironmentFlags.MapAsync | DbEnvironmentFlags.NoLock | DbEnvironmentFlags.WriteMap;
             }
-            environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags);
+            environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags, disableAsync: true);
             environment.MapSize = mapSize;
             environment.MaxDatabases = HashTablesCount + 5;
             environment.MaxReaders = 1000;

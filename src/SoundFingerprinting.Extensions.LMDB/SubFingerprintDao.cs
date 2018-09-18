@@ -28,8 +28,6 @@ namespace SoundFingerprinting.Extensions.LMDB
                 var trackData = tx.GetTrackById(trackId);
                 if (trackData == null) throw new Exception("Track not found");
 
-                var newIds = new List<ulong>();
-
                 ulong newSubFingerprintId = tx.GetLastSubFingerprintId();
 
                 foreach (var hashedFingerprint in hashes)
@@ -43,7 +41,6 @@ namespace SoundFingerprinting.Extensions.LMDB
                                             trackReference,
                                             hashedFingerprint.Clusters);
                     tx.PutSubFingerprint(subFingerprint);
-                    newIds.Add(newSubFingerprintId);
 
                     // Insert hashes to hashTable
                     int table = 0;
