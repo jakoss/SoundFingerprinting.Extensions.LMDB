@@ -12,17 +12,21 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         private readonly IndexesHolder indexesHolder;
 
         public DatabaseContext(string pathToDatabase,
-            long mapSize = (1024L * 1024L * 1024L * 10L),
-            DbEnvironmentFlags lmdbOpenFlags = DbEnvironmentFlags.None
-        ) : this(pathToDatabase, mapSize, lmdbOpenFlags, 50)
+            LMDBConfiguration configuration
+        ) : this(pathToDatabase, configuration.MapSize, configuration.UnsafeAsync, 50)
         {
         }
 
-        private DatabaseContext(string pathToDatabase, long mapSize, DbEnvironmentFlags lmdbOpenFlags, int hashTablesCount)
+        private DatabaseContext(string pathToDatabase, long mapSize, bool unsafeAsync, int hashTablesCount)
         {
             HashTablesCount = hashTablesCount;
 
-            environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags | DbEnvironmentFlags.NoMemInit);
+            var lmdbOpenFlags = DbEnvironmentFlags.NoMemInit;
+            if (unsafeAsync)
+            {
+                lmdbOpenFlags = lmdbOpenFlags | DbEnvironmentFlags.MapAsync | DbEnvironmentFlags.NoLock | DbEnvironmentFlags.WriteMap;
+            }
+            environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags);
             environment.MapSize = mapSize;
             environment.MaxDatabases = HashTablesCount + 5;
             environment.MaxReaders = 1000;

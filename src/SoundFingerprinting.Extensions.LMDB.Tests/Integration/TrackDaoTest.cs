@@ -29,7 +29,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             File.Delete(tempDirectory);
             Directory.CreateDirectory(tempDirectory);
 
-            context = new DatabaseContext(tempDirectory);
+            context = new DatabaseContext(tempDirectory, new LMDBConfiguration());
 
             trackDao = new TrackDao(context);
             subFingerprintDao = new SubFingerprintDao(context);
