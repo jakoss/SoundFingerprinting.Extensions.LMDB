@@ -1,6 +1,6 @@
 # SoundFingerprinting.LMDB
 
-[![NuGet](https://img.shields.io/nuget/v/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.Extensions.LMDB) [![NuGet](https://img.shields.io/nuget/dt/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.Extensions.LMDB) [![GitHub issues](https://img.shields.io/github/issues/Nekromancer/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB/issues) [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![Build status](https://dev.azure.com/NekroVision/SoundFingerprinting.Extensions.LMDB/_apis/build/status/SoundFingerprinting.Extensions.LMDB-CI)](https://dev.azure.com/NekroVision/SoundFingerprinting.Extensions.LMDB/_build/latest?definitionId=1) [![NuGet](https://img.shields.io/nuget/v/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.Extensions.LMDB) [![NuGet](https://img.shields.io/nuget/dt/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://www.nuget.org/packages/SoundFingerprinting.Extensions.LMDB) [![GitHub issues](https://img.shields.io/github/issues/Nekromancer/SoundFingerprinting.Extensions.LMDB.svg?style=flat-square)](https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB/issues) [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 
 
