@@ -127,23 +127,25 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                .OrderBy(e => e.StartsAt);
             InsertHashedFingerprintsForTrack(hashedFingerprintsForSecondTrack, secondTrackReference);
 
+            var metaFields = new Dictionary<string, string>();
+
             const int ThresholdVotes = 25;
             foreach (var hashedFingerprint in hashedFingerprintsForFirstTrack)
             {
                 var subFingerprintData = subFingerprintDao.ReadSubFingerprints(
-                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, new[] { "first-group-id" }).ToList();
+                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, new[] { "first-group-id" }, metaFields).ToList();
 
                 subFingerprintData.Count.Should().Be(1);
                 firstTrackReference.Should().BeEquivalentTo(subFingerprintData[0].TrackReference);
 
                 subFingerprintData = subFingerprintDao.ReadSubFingerprints(
-                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, new[] { "second-group-id" }).ToList();
+                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, new[] { "second-group-id" }, metaFields).ToList();
 
                 subFingerprintData.Count.Should().Be(1);
                 secondTrackReference.Should().BeEquivalentTo(subFingerprintData[0].TrackReference);
 
                 subFingerprintData = subFingerprintDao.ReadSubFingerprints(
-                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, Enumerable.Empty<string>()).ToList();
+                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, Enumerable.Empty<string>(), metaFields).ToList();
                 subFingerprintData.Count.Should().Be(2);
             }
         }

@@ -81,7 +81,7 @@ namespace SoundFingerprinting.Extensions.LMDB
             }
         }
 
-        public ISet<SubFingerprintData> ReadSubFingerprints(IEnumerable<int[]> hashes, int threshold, IEnumerable<string> assignedClusters)
+        public ISet<SubFingerprintData> ReadSubFingerprints(IEnumerable<int[]> hashes, int threshold, IEnumerable<string> assignedClusters, IDictionary<string, string> metaFields)
         {
             var allSubs = new ConcurrentBag<SubFingerprintData>();
             using (var tx = databaseContext.OpenReadOnlyTransaction())
