@@ -194,7 +194,9 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             int modifiedRows = trackDao.DeleteTrack(trackReference);
 
             trackDao.ReadTrackByISRC(tagInfo.ISRC).Should().BeNull();
+#pragma warning disable CS0612 // Type or member is obsolete
             subFingerprintDao.ReadHashedFingerprintsByTrackReference(actualTrack.TrackReference).Should().BeEmpty();
+#pragma warning restore CS0612 // Type or member is obsolete
             modifiedRows.Should().Be(1 + hashData.Count + (25 * hashData.Count));
         }
 

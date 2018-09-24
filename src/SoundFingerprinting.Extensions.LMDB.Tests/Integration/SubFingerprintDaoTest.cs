@@ -59,7 +59,9 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
             InsertHashedFingerprintsForTrack(hashedFingerprints, trackReference);
 
+#pragma warning disable CS0612 // Type or member is obsolete
             var hashedFingerprintss = subFingerprintDao.ReadHashedFingerprintsByTrackReference(trackReference);
+#pragma warning restore CS0612 // Type or member is obsolete
             NumberOfHashBins.Should().Be(hashedFingerprintss.Count);
             foreach (var hashedFingerprint in hashedFingerprintss)
             {
@@ -81,7 +83,9 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
             InsertHashedFingerprintsForTrack(hashedFingerprints, trackReference);
 
+#pragma warning disable CS0612 // Type or member is obsolete
             var hashes = subFingerprintDao.ReadHashedFingerprintsByTrackReference(trackReference);
+#pragma warning restore CS0612 // Type or member is obsolete
             hashedFingerprints.Count.Should().Be(hashes.Count);
             foreach (var data in hashes)
             {
@@ -179,11 +183,13 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
             InsertHashedFingerprintsForTrack(secondHashData, secondTrackReference);
 
+#pragma warning disable CS0612 // Type or member is obsolete
             var resultFirstHashData = subFingerprintDao.ReadHashedFingerprintsByTrackReference(firstTrackReference);
             AssertHashDatasAreTheSame(firstHashData, resultFirstHashData);
 
             var resultSecondHashData = subFingerprintDao.ReadHashedFingerprintsByTrackReference(secondTrackReference);
             AssertHashDatasAreTheSame(secondHashData, resultSecondHashData);
+#pragma warning restore CS0612 // Type or member is obsolete
         }
 
         private void InsertHashedFingerprintsForTrack(IEnumerable<HashedFingerprint> hashedFingerprints, IModelReference trackReference)
