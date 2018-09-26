@@ -206,6 +206,11 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             tx.Commit();
         }
 
+        public void Abort()
+        {
+            tx.Abort();
+        }
+
         public SubFingerprintDataDTO GetSubFingerprint(ulong id)
         {
             return GetSubFingerprint(id, tx);

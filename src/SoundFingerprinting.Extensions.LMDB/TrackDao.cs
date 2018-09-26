@@ -53,15 +53,23 @@ namespace SoundFingerprinting.Extensions.LMDB
         {
             using (var tx = databaseContext.OpenReadWriteTransaction())
             {
-                var newTrackId = tx.GetLastTrackId();
-                newTrackId++;
-                var trackReference = new ModelReference<ulong>(newTrackId);
-                var newTrack = new TrackDataDTO(track, trackReference);
+                try
+                {
+                    var newTrackId = tx.GetLastTrackId();
+                    newTrackId++;
+                    var trackReference = new ModelReference<ulong>(newTrackId);
+                    var newTrack = new TrackDataDTO(track, trackReference);
 
-                tx.PutTrack(newTrack);
+                    tx.PutTrack(newTrack);
 
-                tx.Commit();
-                return trackReference;
+                    tx.Commit();
+                    return trackReference;
+                }
+                catch (Exception)
+                {
+                    tx.Abort();
+                    throw;
+                }
             }
         }
 
