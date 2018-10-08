@@ -1,4 +1,5 @@
-﻿using Spreads.LMDB;
+﻿using SoundFingerprinting.Extensions.LMDB.Exceptions;
+using Spreads.LMDB;
 using System;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
@@ -20,6 +21,12 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         private DatabaseContext(string pathToDatabase, long mapSize, bool unsafeAsync, int hashTablesCount)
         {
             HashTablesCount = hashTablesCount;
+
+            // Check if current process is 64 bit one (needed for lmdb to run)
+            if (!Environment.Is64BitProcess)
+            {
+                throw new BadRuntimeException();
+            }
 
             var lmdbOpenFlags = DbEnvironmentFlags.NoMemInit;
             if (unsafeAsync)
