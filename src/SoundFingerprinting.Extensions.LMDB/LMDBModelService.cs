@@ -27,6 +27,11 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         public override bool SupportsBatchedSubFingerprintQuery => true;
 
+        public void CopyAndCompactLmdbDatabase(string newPath)
+        {
+            databaseContext.CopyAndCompactLmdbDatabase(newPath);
+        }
+
         #region IDisposable Support
 
         private bool disposedValue; // To detect redundant calls

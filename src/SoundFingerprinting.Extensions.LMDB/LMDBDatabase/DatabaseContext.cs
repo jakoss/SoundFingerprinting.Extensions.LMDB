@@ -71,6 +71,11 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             indexesHolder = new IndexesHolder(isrcIndex, titleArtistIndex, tracksSubfingerprintsIndex);
         }
 
+        public void CopyAndCompactLmdbDatabase(string newPath)
+        {
+            environment.CopyTo(newPath, true);
+        }
+
         public ReadOnlyTransaction OpenReadOnlyTransaction()
         {
             return new ReadOnlyTransaction(environment.BeginReadOnlyTransaction(), databasesHolder, indexesHolder);
