@@ -10,7 +10,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>soundfingerprinting database lmdb</PackageTags>
     <Description>Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.</Description>
-    <Version>5.2.3.1-rc1</Version>
+    <Version>5.2.3.1-rc2</Version>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageReleaseNotes>
@@ -33,6 +33,6 @@
   <ItemGroup>
     <PackageReference Include="SoundFingerprinting" Version="5.2.3" />
     <PackageReference Include="ZeroFormatter" Version="1.6.4" />
-    <PackageReference Include="Spreads.LMDB" Version="1.0.0-build1810011233" />
+    <PackageReference Include="Spreads.LMDB" Version="1.0.0-build1810151418" />
   </ItemGroup>
 </Project>
