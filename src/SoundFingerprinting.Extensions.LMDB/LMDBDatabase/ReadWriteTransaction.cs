@@ -162,12 +162,15 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 }
 
                 var titleArtistKey = Encoding.UTF8.GetBytes(track.Title + track.Artist).AsMemory();
-                using (titleArtistKey.Pin())
-                using (var cursor = indexesHolder.TitleArtistIndex.OpenCursor(tx))
+                if (!titleArtistKey.IsEmpty)
                 {
-                    var keyBuffer = new DirectBuffer(titleArtistKey.Span);
-                    if (cursor.TryGet(ref keyBuffer, ref trackKeyBuffer, CursorGetOption.GetBoth))
-                        cursor.Delete(false);
+                    using (titleArtistKey.Pin())
+                    using (var cursor = indexesHolder.TitleArtistIndex.OpenCursor(tx))
+                    {
+                        var keyBuffer = new DirectBuffer(titleArtistKey.Span);
+                        if (cursor.TryGet(ref keyBuffer, ref trackKeyBuffer, CursorGetOption.GetBoth))
+                            cursor.Delete(false);
+                    }
                 }
 
                 if (indexesHolder.TracksSubfingerprintsIndex.TryGet(tx, ref trackKeyBuffer, out DirectBuffer value))
