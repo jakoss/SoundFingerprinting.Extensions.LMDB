@@ -21,31 +21,39 @@ namespace SoundFingerprinting.Extensions.LMDB
         {
             using (var tx = databaseContext.OpenReadWriteTransaction())
             {
-                var count = 0;
-                var trackId = (ulong)trackReference.Id;
-                var trackData = tx.GetTrackById(trackId);
-                if (trackData == null) throw new Exception("Track not found");
-
-                foreach (var subFingerprint in tx.GetSubFingerprintsForTrack(trackId))
+                try
                 {
-                    // Remove hashes from hashTable
-                    int table = 0;
-                    foreach (var hash in subFingerprint.Hashes)
+                    var count = 0;
+                    var trackId = (ulong)trackReference.Id;
+                    var trackData = tx.GetTrackById(trackId);
+                    if (trackData == null) throw new Exception("Track not found");
+
+                    foreach (var subFingerprint in tx.GetSubFingerprintsForTrack(trackId))
                     {
-                        tx.RemoveSubFingerprintsByHashTableAndHash(table, hash, subFingerprint.SubFingerprintReference);
+                        // Remove hashes from hashTable
+                        int table = 0;
+                        foreach (var hash in subFingerprint.Hashes)
+                        {
+                            tx.RemoveSubFingerprintsByHashTableAndHash(table, hash, subFingerprint.SubFingerprintReference);
+                            count++;
+                            table++;
+                        }
+
+                        tx.RemoveSubFingerprint(subFingerprint);
                         count++;
-                        table++;
                     }
 
-                    tx.RemoveSubFingerprint(subFingerprint);
+                    tx.RemoveTrack(trackData);
                     count++;
+
+                    tx.Commit();
+                    return count;
                 }
-
-                tx.RemoveTrack(trackData);
-                count++;
-
-                tx.Commit();
-                return count;
+                catch (Exception)
+                {
+                    tx.Abort();
+                    throw;
+                }
             }
         }
 
