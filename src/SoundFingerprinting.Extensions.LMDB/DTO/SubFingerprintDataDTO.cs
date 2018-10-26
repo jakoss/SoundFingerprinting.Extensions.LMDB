@@ -1,11 +1,11 @@
-﻿using SoundFingerprinting.DAO;
+﻿using MessagePack;
+using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
 using System.Collections.Generic;
-using ZeroFormatter;
 
 namespace SoundFingerprinting.Extensions.LMDB.DTO
 {
-    [ZeroFormattable]
+    [MessagePackObject]
     public class SubFingerprintDataDTO
     {
         public SubFingerprintDataDTO()
@@ -34,23 +34,23 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             TrackReference = (ulong)subFingerprintData.TrackReference.Id;
         }
 
-        [Index(1)]
-        public virtual int[] Hashes { get; set; }
+        [Key(1)]
+        public int[] Hashes { get; set; }
 
-        [Index(2)]
-        public virtual uint SequenceNumber { get; set; }
+        [Key(2)]
+        public uint SequenceNumber { get; set; }
 
-        [Index(3)]
-        public virtual float SequenceAt { get; set; }
+        [Key(3)]
+        public float SequenceAt { get; set; }
 
-        [Index(4)]
-        public virtual IEnumerable<string> Clusters { get; set; }
+        [Key(4)]
+        public IEnumerable<string> Clusters { get; set; }
 
-        [Index(5)]
-        public virtual ulong SubFingerprintReference { get; set; }
+        [Key(5)]
+        public ulong SubFingerprintReference { get; set; }
 
-        [Index(6)]
-        public virtual ulong TrackReference { get; set; }
+        [Key(6)]
+        public ulong TrackReference { get; set; }
 
         internal SubFingerprintData ToSubFingerprintData()
         {

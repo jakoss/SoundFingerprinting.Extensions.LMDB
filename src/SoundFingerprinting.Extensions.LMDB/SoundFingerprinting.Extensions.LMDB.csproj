@@ -31,8 +31,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="SoundFingerprinting" Version="5.2.3" />
-    <PackageReference Include="ZeroFormatter" Version="1.6.4" />
-    <PackageReference Include="Spreads.LMDB" Version="1.0.0-build1810191829" />
+    <PackageReference Include="Spreads.LMDB" Version="1.0.0-build1810250407" />
   </ItemGroup>
 </Project>

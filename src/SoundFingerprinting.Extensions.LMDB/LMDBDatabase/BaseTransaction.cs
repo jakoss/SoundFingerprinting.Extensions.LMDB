@@ -1,9 +1,9 @@
+using MessagePack;
 using SoundFingerprinting.Extensions.LMDB.DTO;
 using Spreads.Buffers;
 using Spreads.LMDB;
 using System;
 using System.Collections.Generic;
-using ZeroFormatter;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
@@ -22,7 +22,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         {
             if (databasesHolder.TracksDatabase.TryGet(transaction, ref id, out DirectBuffer value))
             {
-                return ZeroFormatterSerializer.Deserialize<TrackDataDTO>(value.Span.ToArray());
+                return LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(value.Span.ToArray());
             }
             else
             {
@@ -39,7 +39,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 var keyBuffer = new DirectBuffer(subFingerprintKey.Span);
                 if (databasesHolder.SubFingerprintsDatabase.TryGet(transaction, ref keyBuffer, out value))
                 {
-                    return ZeroFormatterSerializer.Deserialize<SubFingerprintDataDTO>(value.Span.ToArray());
+                    return LZ4MessagePackSerializer.Deserialize<SubFingerprintDataDTO>(value.Span.ToArray());
                 }
                 else
                 {

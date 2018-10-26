@@ -1,10 +1,10 @@
-﻿using SoundFingerprinting.Extensions.LMDB.DTO;
+﻿using MessagePack;
+using SoundFingerprinting.Extensions.LMDB.DTO;
 using Spreads.Buffers;
 using Spreads.LMDB;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ZeroFormatter;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
@@ -48,7 +48,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             foreach (var item in databasesHolder.TracksDatabase.AsEnumerable(tx))
             {
                 var key = item.Key.ReadUInt64(0);
-                var trackData = ZeroFormatterSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray());
+                var trackData = LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray());
                 list.Add(trackData);
             }
             return list;

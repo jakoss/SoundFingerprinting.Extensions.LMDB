@@ -1,10 +1,10 @@
-﻿using SoundFingerprinting.DAO;
+﻿using MessagePack;
+using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
-using ZeroFormatter;
 
 namespace SoundFingerprinting.Extensions.LMDB.DTO
 {
-    [ZeroFormattable]
+    [MessagePackObject]
     public class TrackDataDTO
     {
         internal TrackDataDTO(TrackData trackData, IModelReference modelReference)
@@ -24,26 +24,26 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             // nontheless it is going to be removed in future versions
         }
 
-        [Index(1)]
-        public virtual string Artist { get; internal set; }
+        [Key(1)]
+        public string Artist { get; set; }
 
-        [Index(2)]
-        public virtual string Title { get; internal set; }
+        [Key(2)]
+        public string Title { get; set; }
 
-        [Index(3)]
-        public virtual string ISRC { get; internal set; }
+        [Key(3)]
+        public string ISRC { get; set; }
 
-        [Index(4)]
-        public virtual string Album { get; internal set; }
+        [Key(4)]
+        public string Album { get; set; }
 
-        [Index(5)]
-        public virtual int ReleaseYear { get; internal set; }
+        [Key(5)]
+        public int ReleaseYear { get; set; }
 
-        [Index(6)]
-        public virtual double Length { get; internal set; }
+        [Key(6)]
+        public double Length { get; set; }
 
-        [Index(7)]
-        public virtual ulong TrackReference { get; internal set; }
+        [Key(7)]
+        public ulong TrackReference { get; set; }
 
         internal TrackData ToTrackData()
         {

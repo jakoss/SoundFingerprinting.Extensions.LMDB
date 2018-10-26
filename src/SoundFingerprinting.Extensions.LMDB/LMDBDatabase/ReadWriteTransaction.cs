@@ -1,3 +1,4 @@
+using MessagePack;
 using SoundFingerprinting.Extensions.LMDB.DTO;
 using Spreads.Buffers;
 using Spreads.LMDB;
@@ -5,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using ZeroFormatter;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
@@ -64,7 +64,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         public void PutSubFingerprint(SubFingerprintDataDTO subFingerprintDataDTO)
         {
             var subFingerprintKey = BitConverter.GetBytes(subFingerprintDataDTO.SubFingerprintReference).AsMemory();
-            var subFingerprintValue = ZeroFormatterSerializer.Serialize(subFingerprintDataDTO).AsMemory();
+            var subFingerprintValue = LZ4MessagePackSerializer.Serialize(subFingerprintDataDTO).AsMemory();
 
             using (subFingerprintKey.Pin())
             {
@@ -114,7 +114,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             }
 
             var trackKey = BitConverter.GetBytes(trackDataDTO.TrackReference).AsMemory();
-            var trackValue = ZeroFormatterSerializer.Serialize(trackDataDTO).AsMemory();
+            var trackValue = LZ4MessagePackSerializer.Serialize(trackDataDTO).AsMemory();
 
             using (trackKey.Pin())
             {
