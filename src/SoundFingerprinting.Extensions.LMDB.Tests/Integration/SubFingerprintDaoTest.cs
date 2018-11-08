@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using SoundFingerprinting.Audio;
 using SoundFingerprinting.Builder;
+using SoundFingerprinting.Configuration;
 using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
 using SoundFingerprinting.Data;
@@ -43,8 +44,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void ShouldInsertAndReadSubFingerprints()
         {
-            var track = new TrackData("isrc", "artist", "title", "album", 1986, 200);
-            var trackReference = trackDao.InsertTrack(track);
+            var track = new TrackInfo("isrc", "artist", "title", 200);
+            var trackData = trackDao.InsertTrack(track);
             const int NumberOfHashBins = 100;
             var genericHashBuckets = GenericHashBuckets();
             var hashedFingerprints =
@@ -57,13 +58,12 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                                 sequenceNumber * 0.928f,
                                 Enumerable.Empty<string>()));
 
-            InsertHashedFingerprintsForTrack(hashedFingerprints, trackReference);
+            InsertHashedFingerprintsForTrack(hashedFingerprints, trackData.TrackReference);
 
-#pragma warning disable CS0612 // Type or member is obsolete
-            var hashedFingerprintss = subFingerprintDao.ReadHashedFingerprintsByTrackReference(trackReference);
-#pragma warning restore CS0612 // Type or member is obsolete
-            NumberOfHashBins.Should().Be(hashedFingerprintss.Count);
-            foreach (var hashedFingerprint in hashedFingerprintss)
+            var fingerprints = subFingerprintDao.ReadHashedFingerprintsByTrackReference(trackData.TrackReference)
+                .Select(ToHashedFingerprint()).ToList();
+            NumberOfHashBins.Should().Be(fingerprints.Count);
+            foreach (var hashedFingerprint in fingerprints)
             {
                 genericHashBuckets.Should().BeEquivalentTo(hashedFingerprint.HashBins);
             }
@@ -72,8 +72,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void SameNumberOfHashBinsIsInsertedInAllTablesWhenFingerprintingEntireSongTest()
         {
-            var track = new TrackData(GetTagInfo(1));
-            var trackReference = trackDao.InsertTrack(track);
+            var track = new TrackInfo("isrc", "artist", "title", 120d);
+            var trackData = trackDao.InsertTrack(track);
             var hashedFingerprints = fingerprintCommandBuilder
                 .BuildFingerprintCommand()
                 .From(GetAudioSamples())
@@ -81,11 +81,10 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                 .Hash()
                 .Result;
 
-            InsertHashedFingerprintsForTrack(hashedFingerprints, trackReference);
+            InsertHashedFingerprintsForTrack(hashedFingerprints, trackData.TrackReference);
 
-#pragma warning disable CS0612 // Type or member is obsolete
-            var hashes = subFingerprintDao.ReadHashedFingerprintsByTrackReference(trackReference);
-#pragma warning restore CS0612 // Type or member is obsolete
+            var hashes = subFingerprintDao.ReadHashedFingerprintsByTrackReference(trackData.TrackReference)
+                .Select(ToHashedFingerprint()).ToList();
             hashedFingerprints.Count.Should().Be(hashes.Count);
             foreach (var data in hashes)
             {
@@ -96,11 +95,11 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void ReadByTrackGroupIdWorksAsExpectedTest()
         {
-            TrackData firstTrack = new TrackData(GetTagInfo(1));
-            TrackData secondTrack = new TrackData(GetTagInfo(2));
+            var firstTrack = new TrackInfo("isrc1", "artist", "title", 120d);
+            var secondTrack = new TrackInfo("isrc2", "artist", "title", 120d);
 
-            var firstTrackReference = trackDao.InsertTrack(firstTrack);
-            var secondTrackReference = trackDao.InsertTrack(secondTrack);
+            var firstTrackData = trackDao.InsertTrack(firstTrack);
+            var secondTrackData = trackDao.InsertTrack(secondTrack);
 
             var hashedFingerprintsForFirstTrack = fingerprintCommandBuilder
                 .BuildFingerprintCommand()
@@ -112,10 +111,10 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                 })
                 .UsingServices(audioService)
                 .Hash()
-                .Result
-                .OrderBy(e => e.StartsAt);
+                .Result;
+            //.OrderBy(e => e.StartsAt);
 
-            InsertHashedFingerprintsForTrack(hashedFingerprintsForFirstTrack, firstTrackReference);
+            InsertHashedFingerprintsForTrack(hashedFingerprintsForFirstTrack, firstTrackData.TrackReference);
 
             var hashedFingerprintsForSecondTrack = fingerprintCommandBuilder
                .BuildFingerprintCommand()
@@ -127,9 +126,9 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                })
                .UsingServices(audioService)
                .Hash()
-               .Result
-               .OrderBy(e => e.StartsAt);
-            InsertHashedFingerprintsForTrack(hashedFingerprintsForSecondTrack, secondTrackReference);
+               .Result;
+            //.OrderBy(e => e.StartsAt);
+            InsertHashedFingerprintsForTrack(hashedFingerprintsForSecondTrack, secondTrackData.TrackReference);
 
             var metaFields = new Dictionary<string, string>();
 
@@ -137,19 +136,30 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             foreach (var hashedFingerprint in hashedFingerprintsForFirstTrack)
             {
                 var subFingerprintData = subFingerprintDao.ReadSubFingerprints(
-                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, new[] { "first-group-id" }, metaFields).ToList();
+                    new[] { hashedFingerprint.HashBins }, new DefaultQueryConfiguration
+                    {
+                        ThresholdVotes = ThresholdVotes,
+                        Clusters = new[] { "first-group-id" }
+                    }).ToList();
 
                 subFingerprintData.Count.Should().Be(1);
-                firstTrackReference.Should().BeEquivalentTo(subFingerprintData[0].TrackReference);
+                firstTrackData.TrackReference.Should().BeEquivalentTo(subFingerprintData[0].TrackReference);
 
                 subFingerprintData = subFingerprintDao.ReadSubFingerprints(
-                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, new[] { "second-group-id" }, metaFields).ToList();
+                    new[] { hashedFingerprint.HashBins }, new DefaultQueryConfiguration
+                    {
+                        ThresholdVotes = ThresholdVotes,
+                        Clusters = new[] { "second-group-id" }
+                    }).ToList();
 
                 subFingerprintData.Count.Should().Be(1);
-                secondTrackReference.Should().BeEquivalentTo(subFingerprintData[0].TrackReference);
+                secondTrackData.TrackReference.Should().BeEquivalentTo(subFingerprintData[0].TrackReference);
 
                 subFingerprintData = subFingerprintDao.ReadSubFingerprints(
-                    new[] { hashedFingerprint.HashBins }, ThresholdVotes, Enumerable.Empty<string>(), metaFields).ToList();
+                    new[] { hashedFingerprint.HashBins }, new DefaultQueryConfiguration
+                    {
+                        ThresholdVotes = ThresholdVotes
+                    }).ToList();
                 subFingerprintData.Count.Should().Be(2);
             }
         }
@@ -157,9 +167,9 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void ReadHashDataByTrackTest()
         {
-            var firstTrack = new TrackData("isrc1", "artist", "title", "album", 2012, 200);
+            var firstTrack = new TrackInfo("isrc1", "artist", "title", 200);
 
-            var firstTrackReference = trackDao.InsertTrack(firstTrack);
+            var firstTrackData = trackDao.InsertTrack(firstTrack);
 
             var firstHashData = fingerprintCommandBuilder
                 .BuildFingerprintCommand()
@@ -168,11 +178,11 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                 .Hash()
                 .Result;
 
-            InsertHashedFingerprintsForTrack(firstHashData, firstTrackReference);
+            InsertHashedFingerprintsForTrack(firstHashData, firstTrackData.TrackReference);
 
-            var secondTrack = new TrackData("isrc2", "artist", "title", "album", 2012, 200);
+            var secondTrack = new TrackInfo("isrc2", "artist", "title", 200);
 
-            var secondTrackReference = trackDao.InsertTrack(secondTrack);
+            var secondTrackData = trackDao.InsertTrack(secondTrack);
 
             var secondHashData = fingerprintCommandBuilder
                 .BuildFingerprintCommand()
@@ -181,20 +191,29 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                 .Hash()
                 .Result;
 
-            InsertHashedFingerprintsForTrack(secondHashData, secondTrackReference);
+            InsertHashedFingerprintsForTrack(secondHashData, secondTrackData.TrackReference);
 
-#pragma warning disable CS0612 // Type or member is obsolete
-            var resultFirstHashData = subFingerprintDao.ReadHashedFingerprintsByTrackReference(firstTrackReference);
+            var resultFirstHashData = subFingerprintDao.ReadHashedFingerprintsByTrackReference(firstTrackData.TrackReference)
+                .Select(ToHashedFingerprint()).ToList();
             AssertHashDatasAreTheSame(firstHashData, resultFirstHashData);
 
-            var resultSecondHashData = subFingerprintDao.ReadHashedFingerprintsByTrackReference(secondTrackReference);
+            var resultSecondHashData = subFingerprintDao.ReadHashedFingerprintsByTrackReference(secondTrackData.TrackReference)
+                .Select(ToHashedFingerprint()).ToList();
             AssertHashDatasAreTheSame(secondHashData, resultSecondHashData);
-#pragma warning restore CS0612 // Type or member is obsolete
         }
 
         private void InsertHashedFingerprintsForTrack(IEnumerable<HashedFingerprint> hashedFingerprints, IModelReference trackReference)
         {
             subFingerprintDao.InsertHashDataForTrack(hashedFingerprints, trackReference);
+        }
+
+        private static Func<SubFingerprintData, HashedFingerprint> ToHashedFingerprint()
+        {
+            return subFingerprint => new HashedFingerprint(
+                subFingerprint.Hashes,
+                subFingerprint.SequenceNumber,
+                subFingerprint.SequenceAt,
+                subFingerprint.Clusters);
         }
     }
 }

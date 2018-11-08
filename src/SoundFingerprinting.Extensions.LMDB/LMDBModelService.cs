@@ -25,8 +25,6 @@ namespace SoundFingerprinting.Extensions.LMDB
             this.databaseContext = databaseContext;
         }
 
-        public override bool SupportsBatchedSubFingerprintQuery => true;
-
         public void CopyAndCompactLmdbDatabase(string newPath)
         {
             databaseContext.CopyAndCompactLmdbDatabase(newPath);

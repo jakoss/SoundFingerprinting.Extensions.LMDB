@@ -1,5 +1,6 @@
 ﻿using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
+using SoundFingerprinting.Data;
 using SoundFingerprinting.Extensions.LMDB.DTO;
 using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
 using System;
@@ -12,6 +13,8 @@ namespace SoundFingerprinting.Extensions.LMDB
     {
         private readonly DatabaseContext databaseContext;
 
+        public int Count => GetTracksCount();
+
         internal TrackDao(DatabaseContext databaseContext)
         {
             this.databaseContext = databaseContext;
@@ -23,31 +26,13 @@ namespace SoundFingerprinting.Extensions.LMDB
             {
                 try
                 {
-                    var count = 0;
                     var trackId = (ulong)trackReference.Id;
                     var trackData = tx.GetTrackById(trackId);
                     if (trackData == null) throw new Exception("Track not found");
-
-                    foreach (var subFingerprint in tx.GetSubFingerprintsForTrack(trackId))
-                    {
-                        // Remove hashes from hashTable
-                        int table = 0;
-                        foreach (var hash in subFingerprint.Hashes)
-                        {
-                            tx.RemoveSubFingerprintsByHashTableAndHash(table, hash, subFingerprint.SubFingerprintReference);
-                            count++;
-                            table++;
-                        }
-
-                        tx.RemoveSubFingerprint(subFingerprint);
-                        count++;
-                    }
-
                     tx.RemoveTrack(trackData);
-                    count++;
 
                     tx.Commit();
-                    return count;
+                    return 1;
                 }
                 catch (Exception)
                 {
@@ -57,7 +42,27 @@ namespace SoundFingerprinting.Extensions.LMDB
             }
         }
 
-        public IModelReference InsertTrack(TrackData track)
+        public void InsertTrack(TrackData track)
+        {
+            using (var tx = databaseContext.OpenReadWriteTransaction())
+            {
+                try
+                {
+                    var newTrack = new TrackDataDTO(track);
+
+                    tx.PutTrack(newTrack);
+
+                    tx.Commit();
+                }
+                catch (Exception)
+                {
+                    tx.Abort();
+                    throw;
+                }
+            }
+        }
+
+        public TrackData InsertTrack(TrackInfo track)
         {
             using (var tx = databaseContext.OpenReadWriteTransaction())
             {
@@ -71,7 +76,7 @@ namespace SoundFingerprinting.Extensions.LMDB
                     tx.PutTrack(newTrack);
 
                     tx.Commit();
-                    return trackReference;
+                    return newTrack.ToTrackData();
                 }
                 catch (Exception)
                 {
@@ -81,11 +86,14 @@ namespace SoundFingerprinting.Extensions.LMDB
             }
         }
 
-        public IList<TrackData> ReadAll()
+        public IEnumerable<TrackData> ReadAll()
         {
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {
-                return tx.GetAllTracks().Select(e => e.ToTrackData()).ToList();
+                foreach (var track in tx.GetAllTracks())
+                {
+                    yield return track.ToTrackData();
+                }
             }
         }
 
@@ -93,35 +101,40 @@ namespace SoundFingerprinting.Extensions.LMDB
         {
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {
-                return tx.GetTrackById((ulong)trackReference.Id)?.ToTrackData();
+                return tx.GetTrackByReference((ulong)trackReference.Id)?.ToTrackData();
             }
         }
 
-        public IList<TrackData> ReadTrackByArtistAndTitleName(string artist, string title)
+        public IEnumerable<TrackData> ReadTrackByTitle(string title)
         {
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {
-                return tx.GetTracksByArtistAndTitleName(artist, title).Select(e => e.ToTrackData()).ToList();
+                return tx.GetTracksByTitle(title).Select(e => e.ToTrackData());
             }
         }
 
-        public TrackData ReadTrackByISRC(string isrc)
+        public TrackData ReadTrackById(string id)
         {
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {
-                return tx.GetTrackByISRC(isrc)?.ToTrackData();
+                return tx.GetTrackById(id)?.ToTrackData();
             }
         }
 
-        public List<TrackData> ReadTracks(IEnumerable<IModelReference> ids)
+        public IEnumerable<TrackData> ReadTracksByReferences(IEnumerable<IModelReference> references)
         {
-            var result = new List<TrackData>();
-            foreach (var id in ids)
+            foreach (var id in references)
             {
-                result.Add(ReadTrack(id));
+                yield return ReadTrack(id);
             }
+        }
 
-            return result;
+        private int GetTracksCount()
+        {
+            using (var tx = databaseContext.OpenReadOnlyTransaction())
+            {
+                return tx.GetTracksCount();
+            }
         }
     }
 }

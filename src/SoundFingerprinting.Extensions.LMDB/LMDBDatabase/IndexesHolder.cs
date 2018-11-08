@@ -5,23 +5,23 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
     internal class IndexesHolder : IDisposable
     {
-        public IndexesHolder(Database isrcIndex, Database titleArtistIndex, Database tracksSubfingerprintsIndex)
+        public IndexesHolder(Database idIndex, Database titleIndex, Database tracksSubfingerprintsIndex)
         {
-            IsrcIndex = isrcIndex;
-            TitleArtistIndex = titleArtistIndex;
+            IdIndex = idIndex;
+            TitleIndex = titleIndex;
             TracksSubfingerprintsIndex = tracksSubfingerprintsIndex;
         }
 
-        public Database IsrcIndex { get; }
+        public Database IdIndex { get; }
 
-        public Database TitleArtistIndex { get; }
+        public Database TitleIndex { get; }
 
         public Database TracksSubfingerprintsIndex { get; }
 
         public void Dispose()
         {
-            IsrcIndex.Dispose();
-            TitleArtistIndex.Dispose();
+            IdIndex.Dispose();
+            TitleIndex.Dispose();
             TracksSubfingerprintsIndex.Dispose();
         }
     }

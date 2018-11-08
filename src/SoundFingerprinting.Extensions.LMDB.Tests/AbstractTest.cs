@@ -3,6 +3,7 @@
     using FluentAssertions;
     using SoundFingerprinting.DAO;
     using SoundFingerprinting.DAO.Data;
+    using SoundFingerprinting.Data;
 
     public abstract class AbstractTest
     {
@@ -40,15 +41,12 @@
             return (int[])genericHashBucketsArray.Clone();
         }
 
-        protected void AssertTracksAreEqual(TrackData expectedTrack, TrackData actualTrack)
+        protected void AssertTracksAreEqual(TrackInfo expectedTrack, TrackData actualTrack)
         {
-            // FIXME : https://github.com/AddictedCS/soundfingerprinting/issues/98
-            // expectedTrack.TrackReference.Should().BeEquivalentTo(actualTrack.TrackReference);
-            expectedTrack.Album.Should().BeEquivalentTo(actualTrack.Album);
             expectedTrack.Artist.Should().BeEquivalentTo(actualTrack.Artist);
             expectedTrack.Title.Should().BeEquivalentTo(actualTrack.Title);
-            expectedTrack.Length.Should().Be(actualTrack.Length);
-            expectedTrack.ISRC.Should().BeEquivalentTo(actualTrack.ISRC);
+            expectedTrack.DurationInSeconds.Should().Be(actualTrack.Length);
+            expectedTrack.Id.Should().BeEquivalentTo(actualTrack.ISRC);
         }
 
         protected void AssertModelReferenceIsInitialized(IModelReference modelReference)

@@ -98,18 +98,18 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
         public void PutTrack(TrackDataDTO trackDataDTO)
         {
-            if (string.IsNullOrWhiteSpace(trackDataDTO.ISRC))
+            if (string.IsNullOrWhiteSpace(trackDataDTO.Id))
             {
-                throw new ArgumentException("ISRC have to be unique and not empty", nameof(trackDataDTO.ISRC));
+                throw new ArgumentException("Id have to be unique and not empty", nameof(trackDataDTO.Id));
             }
             // check for isrc in database
-            var isrcKey = Encoding.UTF8.GetBytes(trackDataDTO.ISRC).AsMemory();
-            using (isrcKey.Pin())
+            var idKey = Encoding.UTF8.GetBytes(trackDataDTO.Id).AsMemory();
+            using (idKey.Pin())
             {
-                var keyBuffer = new DirectBuffer(isrcKey.Span);
-                if (indexesHolder.IsrcIndex.TryGet(tx, ref keyBuffer, out DirectBuffer testBuffer))
+                var keyBuffer = new DirectBuffer(idKey.Span);
+                if (indexesHolder.IdIndex.TryGet(tx, ref keyBuffer, out DirectBuffer testBuffer))
                 {
-                    throw new ArgumentException("Track with given ISRC already exists", nameof(trackDataDTO.ISRC));
+                    throw new ArgumentException("Track with given Id already exists", nameof(trackDataDTO.Id));
                 }
             }
 
@@ -126,19 +126,19 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 }
 
                 // create indexes
-                using (isrcKey.Pin())
+                using (idKey.Pin())
                 {
-                    var keyBuffer = new DirectBuffer(isrcKey.Span);
-                    indexesHolder.IsrcIndex.Put(tx, ref keyBuffer, ref trackKeyBuffer);
+                    var keyBuffer = new DirectBuffer(idKey.Span);
+                    indexesHolder.IdIndex.Put(tx, ref keyBuffer, ref trackKeyBuffer);
                 }
 
-                var titleArtistKey = Encoding.UTF8.GetBytes(trackDataDTO.Title + trackDataDTO.Artist).AsMemory();
-                if (!titleArtistKey.IsEmpty)
+                var titleKey = Encoding.UTF8.GetBytes(trackDataDTO.Title).AsMemory();
+                if (!titleKey.IsEmpty)
                 {
-                    using (titleArtistKey.Pin())
+                    using (titleKey.Pin())
                     {
-                        var keyBuffer = new DirectBuffer(titleArtistKey.Span);
-                        indexesHolder.TitleArtistIndex.Put(tx, ref keyBuffer, ref trackKeyBuffer);
+                        var keyBuffer = new DirectBuffer(titleKey.Span);
+                        indexesHolder.TitleIndex.Put(tx, ref keyBuffer, ref trackKeyBuffer);
                     }
                 }
             }
@@ -154,27 +154,24 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 var track = GetTrackById(ref trackKeyBuffer, tx);
 
                 // remove indexes
-                var isrcKey = Encoding.UTF8.GetBytes(track.ISRC).AsMemory();
-                using (isrcKey.Pin())
+                var idKey = Encoding.UTF8.GetBytes(track.Id).AsMemory();
+                using (idKey.Pin())
                 {
-                    var keyBuffer = new DirectBuffer(isrcKey.Span);
-                    indexesHolder.IsrcIndex.Delete(tx, ref keyBuffer);
+                    var keyBuffer = new DirectBuffer(idKey.Span);
+                    indexesHolder.IdIndex.Delete(tx, ref keyBuffer);
                 }
 
-                var titleArtistKey = Encoding.UTF8.GetBytes(track.Title + track.Artist).AsMemory();
-                if (!titleArtistKey.IsEmpty)
+                var titleKey = Encoding.UTF8.GetBytes(track.Title).AsMemory();
+                if (!titleKey.IsEmpty)
                 {
-                    using (titleArtistKey.Pin())
-                    using (var cursor = indexesHolder.TitleArtistIndex.OpenCursor(tx))
+                    using (titleKey.Pin())
+                    using (var cursor = indexesHolder.TitleIndex.OpenCursor(tx))
                     {
-                        var keyBuffer = new DirectBuffer(titleArtistKey.Span);
+                        var keyBuffer = new DirectBuffer(titleKey.Span);
                         if (cursor.TryGet(ref keyBuffer, ref trackKeyBuffer, CursorGetOption.GetBoth))
                             cursor.Delete(false);
                     }
                 }
-
-                if (indexesHolder.TracksSubfingerprintsIndex.TryGet(tx, ref trackKeyBuffer, out DirectBuffer value))
-                    indexesHolder.TracksSubfingerprintsIndex.Delete(tx, ref trackKeyBuffer);
 
                 // remove track
                 databasesHolder.TracksDatabase.Delete(tx, ref trackKeyBuffer);
@@ -188,6 +185,17 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             {
                 var keyBuffer = new DirectBuffer(subFingerprintKey.Span);
                 databasesHolder.SubFingerprintsDatabase.Delete(tx, ref keyBuffer);
+
+                var trackKey = BitConverter.GetBytes(subFingerprintDataDTO.TrackReference).AsMemory();
+                using (trackKey.Pin())
+                {
+                    var trackKeyBuffer = new DirectBuffer(trackKey.Span);
+                    using (var cursor = indexesHolder.TracksSubfingerprintsIndex.OpenCursor(tx))
+                    {
+                        if (cursor.TryGet(ref trackKeyBuffer, ref keyBuffer, CursorGetOption.GetBoth))
+                            cursor.Delete(false);
+                    }
+                }
             }
         }
 
@@ -212,16 +220,6 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         public void Abort()
         {
             tx.Abort();
-        }
-
-        public SubFingerprintDataDTO GetSubFingerprint(ulong id)
-        {
-            return GetSubFingerprint(id, tx);
-        }
-
-        public Span<ulong> GetSubFingerprintsByHashTableAndHash(int table, int hash)
-        {
-            return GetSubFingerprintsByHashTableAndHash(table, hash, tx);
         }
 
         public TrackDataDTO GetTrackById(ulong id)

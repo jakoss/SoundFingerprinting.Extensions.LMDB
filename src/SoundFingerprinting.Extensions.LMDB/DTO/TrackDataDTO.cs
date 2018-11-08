@@ -1,21 +1,29 @@
 ﻿using MessagePack;
 using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
+using SoundFingerprinting.Data;
 
 namespace SoundFingerprinting.Extensions.LMDB.DTO
 {
     [MessagePackObject]
     public class TrackDataDTO
     {
-        internal TrackDataDTO(TrackData trackData, IModelReference modelReference)
+        internal TrackDataDTO(TrackInfo trackInfo, IModelReference modelReference)
         {
-            ISRC = trackData.ISRC;
+            Id = trackInfo.Id;
+            Artist = trackInfo.Artist;
+            Title = trackInfo.Title;
+            Length = trackInfo.DurationInSeconds;
+            TrackReference = (ulong)modelReference.Id;
+        }
+
+        internal TrackDataDTO(TrackData trackData)
+        {
+            Id = trackData.ISRC;
             Artist = trackData.Artist;
             Title = trackData.Title;
-            Album = trackData.Album;
-            ReleaseYear = trackData.ReleaseYear;
             Length = trackData.Length;
-            TrackReference = (ulong)modelReference.Id;
+            TrackReference = (ulong)trackData.TrackReference.Id;
         }
 
         public TrackDataDTO()
@@ -25,29 +33,23 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
         }
 
         [Key(1)]
-        public string Artist { get; set; }
+        public string Id { get; set; }
 
         [Key(2)]
-        public string Title { get; set; }
+        public string Artist { get; set; }
 
         [Key(3)]
-        public string ISRC { get; set; }
+        public string Title { get; set; }
 
         [Key(4)]
-        public string Album { get; set; }
-
-        [Key(5)]
-        public int ReleaseYear { get; set; }
-
-        [Key(6)]
         public double Length { get; set; }
 
-        [Key(7)]
+        [Key(5)]
         public ulong TrackReference { get; set; }
 
         internal TrackData ToTrackData()
         {
-            return new TrackData(ISRC, Artist, Title, Album, ReleaseYear, Length, new ModelReference<ulong>(TrackReference));
+            return new TrackData(Id, Artist, Title, string.Empty, 0, Length, new ModelReference<ulong>(TrackReference));
         }
     }
 }

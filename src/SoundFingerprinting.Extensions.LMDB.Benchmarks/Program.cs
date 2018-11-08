@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Running;
 using SoundFingerprinting.Audio;
 using SoundFingerprinting.Builder;
-using SoundFingerprinting.DAO.Data;
+using SoundFingerprinting.Data;
 using SoundFingerprinting.InMemory;
 using System;
 using System.IO;
@@ -30,9 +30,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
 
                     Console.WriteLine($"Adding track {filename} ({duration:0.00})");
 
-                    var track = new TrackData(filename, string.Empty, string.Empty, string.Empty, 2018, duration);
-                    var lmdbTrackReference = lmdbModelService.InsertTrack(track);
-                    var inMemoryTrackReference = inMemoryModelService.InsertTrack(track);
+                    var track = new TrackInfo(filename, string.Empty, string.Empty, duration);
 
                     var hashedFingerprints = FingerprintCommandBuilder.Instance
                         .BuildFingerprintCommand()
@@ -41,8 +39,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
                         .Hash()
                         .Result;
 
-                    lmdbModelService.InsertHashDataForTrack(hashedFingerprints, lmdbTrackReference);
-                    inMemoryModelService.InsertHashDataForTrack(hashedFingerprints, inMemoryTrackReference);
+                    var lmdbTrackReference = lmdbModelService.Insert(track, hashedFingerprints);
+                    var inMemoryTrackReference = inMemoryModelService.Insert(track, hashedFingerprints);
                 }
                 inMemoryModelService.Snapshot(Path.Combine(databasesPath, "memory.db"));
                 lmdbModelService.Dispose();

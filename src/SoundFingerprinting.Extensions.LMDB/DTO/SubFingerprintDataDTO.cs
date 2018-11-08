@@ -55,7 +55,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
         internal SubFingerprintData ToSubFingerprintData()
         {
             return new SubFingerprintData(
-                Hashes, SequenceNumber, SequenceAt,
+                Hashes, SequenceNumber, SequenceAt, Clusters,
                 new ModelReference<ulong>(SubFingerprintReference),
                 new ModelReference<ulong>(TrackReference)
             );

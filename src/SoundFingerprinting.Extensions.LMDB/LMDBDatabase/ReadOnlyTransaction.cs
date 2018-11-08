@@ -42,21 +42,47 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             return GetSubFingerprintsByHashTableAndHash(table, hash, tx);
         }
 
+        public int GetSubFingerprintsCount()
+        {
+            using (var cursor = databasesHolder.SubFingerprintsDatabase.OpenReadOnlyCursor(tx))
+            {
+                return (int)cursor.Count();
+            }
+        }
+
+        public int GetTracksCount()
+        {
+            using (var cursor = databasesHolder.TracksDatabase.OpenReadOnlyCursor(tx))
+            {
+                return (int)cursor.Count();
+            }
+        }
+
+        public IEnumerable<int> GetHashCountsPerTable()
+        {
+            var counters = new List<int>();
+            foreach (var table in databasesHolder.HashTables)
+            {
+                using (var cursor = table.OpenReadOnlyCursor(tx))
+                {
+                    counters.Add((int)cursor.Count());
+                }
+            }
+            return counters;
+        }
+
         public IEnumerable<TrackDataDTO> GetAllTracks()
         {
-            var list = new List<TrackDataDTO>();
             foreach (var item in databasesHolder.TracksDatabase.AsEnumerable(tx))
             {
                 var key = item.Key.ReadUInt64(0);
-                var trackData = LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray());
-                list.Add(trackData);
+                yield return LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray());
             }
-            return list;
         }
 
-        public IEnumerable<TrackDataDTO> GetTracksByArtistAndTitleName(string artist, string title)
+        public IEnumerable<TrackDataDTO> GetTracksByTitle(string title)
         {
-            var titleArtistKey = Encoding.UTF8.GetBytes(title + artist).AsMemory();
+            var titleKey = Encoding.UTF8.GetBytes(title).AsMemory();
             var list = new List<TrackDataDTO>();
 
             void GetTrack(ref DirectBuffer directBuffer)
@@ -70,11 +96,11 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 }
             }
 
-            using (titleArtistKey.Pin())
+            using (titleKey.Pin())
             {
-                using (var cursor = indexesHolder.TitleArtistIndex.OpenReadOnlyCursor(tx))
+                using (var cursor = indexesHolder.TitleIndex.OpenReadOnlyCursor(tx))
                 {
-                    var keyBuffer = new DirectBuffer(titleArtistKey.Span);
+                    var keyBuffer = new DirectBuffer(titleKey.Span);
                     var valueBuffer = default(DirectBuffer);
                     if (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.Set)
                         && cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.FirstDuplicate))
@@ -91,13 +117,13 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             return list;
         }
 
-        public TrackDataDTO GetTrackByISRC(string isrc)
+        public TrackDataDTO GetTrackById(string id)
         {
-            var isrcKey = Encoding.UTF8.GetBytes(isrc).AsMemory();
-            using (isrcKey.Pin())
+            var idKey = Encoding.UTF8.GetBytes(id).AsMemory();
+            using (idKey.Pin())
             {
-                var keyBuffer = new DirectBuffer(isrcKey.Span);
-                if (indexesHolder.IsrcIndex.TryGet(tx, ref keyBuffer, out DirectBuffer valueBuffer))
+                var keyBuffer = new DirectBuffer(idKey.Span);
+                if (indexesHolder.IdIndex.TryGet(tx, ref keyBuffer, out DirectBuffer valueBuffer))
                 {
                     var trackId = valueBuffer.ReadUInt64(0);
                     var trackKey = BitConverter.GetBytes(trackId).AsMemory();
@@ -114,7 +140,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             }
         }
 
-        public TrackDataDTO GetTrackById(ulong id)
+        public TrackDataDTO GetTrackByReference(ulong id)
         {
             var trackKey = BitConverter.GetBytes(id).AsMemory();
             using (trackKey.Pin())
