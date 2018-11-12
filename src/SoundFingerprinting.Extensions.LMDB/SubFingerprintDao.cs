@@ -140,7 +140,7 @@ namespace SoundFingerprinting.Extensions.LMDB
                     }
                 });
 
-                return allSubs;
+                return allSubs.Distinct();
             }
         }
 
