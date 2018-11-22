@@ -30,6 +30,6 @@
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="SoundFingerprinting" Version="6.0.0" />
-    <PackageReference Include="Spreads.LMDB" Version="1.0.0-build1811081558" />
+    <PackageReference Include="Spreads.LMDB" Version="1.0.0-build1811161327" />
   </ItemGroup>
 </Project>
