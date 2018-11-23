@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+// ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
@@ -107,7 +108,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             using (idKey.Pin())
             {
                 var keyBuffer = new DirectBuffer(idKey.Span);
-                if (indexesHolder.IdIndex.TryGet(tx, ref keyBuffer, out DirectBuffer testBuffer))
+                if (indexesHolder.IdIndex.TryGet(tx, ref keyBuffer, out _))
                 {
                     throw new ArgumentException("Track with given Id already exists", nameof(trackDataDTO.Id));
                 }
@@ -232,7 +233,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             }
         }
 
-        public List<SubFingerprintDataDTO> GetSubFingerprintsForTrack(ulong id)
+        public IEnumerable<SubFingerprintDataDTO> GetSubFingerprintsForTrack(ulong id)
         {
             return GetSubFingerprintsForTrack(id, tx);
         }

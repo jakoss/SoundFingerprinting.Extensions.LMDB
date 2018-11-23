@@ -4,7 +4,9 @@ using Spreads.Buffers;
 using Spreads.LMDB;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+// ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
@@ -32,7 +34,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             return GetSubFingerprint(id, tx);
         }
 
-        public List<SubFingerprintDataDTO> GetSubFingerprintsForTrack(ulong id)
+        public IEnumerable<SubFingerprintDataDTO> GetSubFingerprintsForTrack(ulong id)
         {
             return GetSubFingerprintsForTrack(id, tx);
         }
@@ -73,11 +75,8 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
         public IEnumerable<TrackDataDTO> GetAllTracks()
         {
-            foreach (var item in databasesHolder.TracksDatabase.AsEnumerable(tx))
-            {
-                var key = item.Key.ReadUInt64(0);
-                yield return LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray());
-            }
+            return databasesHolder.TracksDatabase.AsEnumerable(tx)
+                .Select(item => LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray()));
         }
 
         public IEnumerable<TrackDataDTO> GetTracksByTitle(string title)
@@ -133,10 +132,8 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                         return GetTrackById(ref trackKeyBuffer, tx);
                     }
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
         }
 

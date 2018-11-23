@@ -12,7 +12,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         private readonly DatabasesHolder databasesHolder;
         private readonly IndexesHolder indexesHolder;
 
-        public BaseTransaction(DatabasesHolder databasesHolder, IndexesHolder indexesHolder)
+        protected BaseTransaction(DatabasesHolder databasesHolder, IndexesHolder indexesHolder)
         {
             this.databasesHolder = databasesHolder;
             this.indexesHolder = indexesHolder;
@@ -20,35 +20,30 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
         protected TrackDataDTO GetTrackById(ref DirectBuffer id, Spreads.LMDB.ReadOnlyTransaction transaction)
         {
-            if (databasesHolder.TracksDatabase.TryGet(transaction, ref id, out DirectBuffer value))
+            if (databasesHolder.TracksDatabase.TryGet(transaction, ref id, out var value))
             {
                 return LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(value.Span.ToArray());
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         protected SubFingerprintDataDTO GetSubFingerprint(ulong id, Spreads.LMDB.ReadOnlyTransaction transaction)
         {
             var subFingerprintKey = BitConverter.GetBytes(id).AsMemory();
-            var value = default(DirectBuffer);
             using (subFingerprintKey.Pin())
             {
                 var keyBuffer = new DirectBuffer(subFingerprintKey.Span);
-                if (databasesHolder.SubFingerprintsDatabase.TryGet(transaction, ref keyBuffer, out value))
+                if (databasesHolder.SubFingerprintsDatabase.TryGet(transaction, ref keyBuffer, out var value))
                 {
                     return LZ4MessagePackSerializer.Deserialize<SubFingerprintDataDTO>(value.Span.ToArray());
                 }
-                else
-                {
-                    throw new KeyNotFoundException();
-                }
+
+                throw new KeyNotFoundException();
             }
         }
 
-        protected List<SubFingerprintDataDTO> GetSubFingerprintsForTrack(ulong id, Spreads.LMDB.ReadOnlyTransaction transaction)
+        protected IEnumerable<SubFingerprintDataDTO> GetSubFingerprintsForTrack(ulong id, Spreads.LMDB.ReadOnlyTransaction transaction)
         {
             var trackKey = BitConverter.GetBytes(id).AsMemory();
             var list = new List<SubFingerprintDataDTO>();

@@ -33,7 +33,7 @@ namespace SoundFingerprinting.Extensions.LMDB
                 var trackData = tx.GetTrackById(trackId);
                 if (trackData == null) throw new Exception("Track not found");
 
-                ulong newSubFingerprintId = tx.GetLastSubFingerprintId();
+                var newSubFingerprintId = tx.GetLastSubFingerprintId();
                 var result = new List<SubFingerprintData>();
 
                 foreach (var hashedFingerprint in hashedFingerprints)
@@ -49,7 +49,7 @@ namespace SoundFingerprinting.Extensions.LMDB
                     tx.PutSubFingerprint(subFingerprint);
 
                     // Insert hashes to hashTable
-                    int table = 0;
+                    var table = 0;
                     foreach (var hash in hashedFingerprint.HashBins)
                     {
                         tx.PutSubFingerprintsByHashTableAndHash(table, hash, newSubFingerprintId);
@@ -88,7 +88,7 @@ namespace SoundFingerprinting.Extensions.LMDB
                     foreach (var subFingerprint in tx.GetSubFingerprintsForTrack(trackId))
                     {
                         // Remove hashes from hashTable
-                        int table = 0;
+                        var table = 0;
                         foreach (var hash in subFingerprint.Hashes)
                         {
                             tx.RemoveSubFingerprintsByHashTableAndHash(table, hash, subFingerprint.SubFingerprintReference);
@@ -114,12 +114,9 @@ namespace SoundFingerprinting.Extensions.LMDB
         {
             using (var tx = databaseContext.OpenReadOnlyTransaction())
             {
-                var result = new List<SubFingerprintData>();
-                foreach (var subFingerprint in tx.GetSubFingerprintsForTrack((ulong)trackReference.Id))
-                {
-                    result.Add(subFingerprint.ToSubFingerprintData());
-                }
-                return result;
+                return tx.GetSubFingerprintsForTrack((ulong) trackReference.Id)
+                    .Select(subFingerprint => subFingerprint.ToSubFingerprintData())
+                    .ToList();
             }
         }
 
@@ -148,23 +145,29 @@ namespace SoundFingerprinting.Extensions.LMDB
             ReadOnlyTransaction tx)
         {
             var subFingeprintIds = GetSubFingerprintMatches(hashes, thresholdVotes, tx);
-            var subFingerprints = subFingeprintIds.Select(id => tx.GetSubFingerprint(id));
+            var subFingerprints = subFingeprintIds.Select(tx.GetSubFingerprint);
 
             var clusters = assignedClusters as List<string> ?? assignedClusters.ToList();
             if (clusters.Count > 0)
             {
-                return subFingerprints.Where(subFingerprint => subFingerprint.Clusters.Intersect(clusters).Any()).Select(e => e.ToSubFingerprintData());
+                return subFingerprints
+                    .Where(subFingerprint => 
+                        subFingerprint.Clusters
+                            .Intersect(clusters)
+                            .Any())
+                    .Select(e => e.ToSubFingerprintData());
             }
 
-            return subFingerprints.Select(e => e.ToSubFingerprintData());
+            return subFingerprints
+                .Select(e => e.ToSubFingerprintData());
         }
 
-        private IEnumerable<ulong> GetSubFingerprintMatches(int[] hashes, int thresholdVotes, ReadOnlyTransaction tx)
+        private static IEnumerable<ulong> GetSubFingerprintMatches(IReadOnlyList<int> hashes, int thresholdVotes, ReadOnlyTransaction tx)
         {
             var counter = new Dictionary<ulong, int>();
-            for (int table = 0; table < hashes.Length; ++table)
+            for (var table = 0; table < hashes.Count; ++table)
             {
-                int hashBin = hashes[table];
+                var hashBin = hashes[table];
                 var ids = tx.GetSubFingerprintsByHashTableAndHash(table, hashBin);
                 foreach (var id in ids)
                 {
@@ -173,7 +176,9 @@ namespace SoundFingerprinting.Extensions.LMDB
                 }
             }
 
-            return counter.Where(pair => pair.Value >= thresholdVotes).Select(p => p.Key);
+            return counter
+                .Where(pair => pair.Value >= thresholdVotes)
+                .Select(p => p.Key);
         }
 
         private int GetSubFingerprintCounts()

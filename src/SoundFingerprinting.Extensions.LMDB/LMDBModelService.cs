@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace SoundFingerprinting.Extensions.LMDB
 {
-    public class LMDBModelService : ModelService, IDisposable
+    public sealed class LMDBModelService : ModelService, IDisposable
     {
         private readonly DatabaseContext databaseContext;
 
@@ -34,7 +34,7 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         private bool disposedValue; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposedValue)
             {

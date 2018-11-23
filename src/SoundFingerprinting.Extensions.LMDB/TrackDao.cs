@@ -123,10 +123,7 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         public IEnumerable<TrackData> ReadTracksByReferences(IEnumerable<IModelReference> references)
         {
-            foreach (var id in references)
-            {
-                yield return ReadTrack(id);
-            }
+            return references.Select(ReadTrack);
         }
 
         private int GetTracksCount()

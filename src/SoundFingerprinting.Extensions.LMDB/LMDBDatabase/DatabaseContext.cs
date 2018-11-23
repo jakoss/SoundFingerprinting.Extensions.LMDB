@@ -6,7 +6,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
     internal sealed class DatabaseContext : IDisposable
     {
-        public int HashTablesCount { get; }
+        private int HashTablesCount { get; }
 
         private readonly LMDBEnvironment environment;
         private readonly DatabasesHolder databasesHolder;
@@ -52,7 +52,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 | DbFlags.IntegerKey
                 | DbFlags.IntegerDuplicates
             );
-            for (int i = 0; i < hashTablesCount; i++)
+            for (var i = 0; i < hashTablesCount; i++)
             {
                 hashTables[i] = environment.OpenDatabase($"HashTable{i}", hashTableConfig);
             }
