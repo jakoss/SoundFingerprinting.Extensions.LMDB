@@ -166,3 +166,9 @@ All are welcome to open Issues and Pull Requests. You can contact me on email [j
 ## License
 
 The framework is provided under [MIT](LICENSE) license agreement.
+
+
+
+Thanks to [JetBrains](https://www.jetbrains.com/?from=SoundFingerprinting.Extensions.LMDB) for granting this project with license for Rider and .NET diagnostic Tools
+
+![JetBrains Logo](./images/jetbrains.svg)
