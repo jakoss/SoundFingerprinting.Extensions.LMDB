@@ -122,7 +122,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             using (idKey.Pin())
             {
                 var keyBuffer = new DirectBuffer(idKey.Span);
-                if (indexesHolder.IdIndex.TryGet(tx, ref keyBuffer, out DirectBuffer valueBuffer))
+                if (indexesHolder.IdIndex.TryGet(tx, ref keyBuffer, out var valueBuffer))
                 {
                     var trackId = valueBuffer.ReadUInt64(0);
                     var trackKey = BitConverter.GetBytes(trackId).AsMemory();

@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SoundFingerprinting.Extensions.LMDB.Exceptions;
 
 namespace SoundFingerprinting.Extensions.LMDB
 {
@@ -31,7 +32,7 @@ namespace SoundFingerprinting.Extensions.LMDB
             {
                 var trackId = (ulong)trackReference.Id;
                 var trackData = tx.GetTrackById(trackId);
-                if (trackData == null) throw new Exception("Track not found");
+                if (trackData == null) throw new TrackNotFoundException(trackId);
 
                 var newSubFingerprintId = tx.GetLastSubFingerprintId();
                 var result = new List<SubFingerprintData>();

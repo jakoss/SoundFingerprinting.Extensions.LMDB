@@ -4,6 +4,7 @@ using Spreads.Buffers;
 using Spreads.LMDB;
 using System;
 using System.Collections.Generic;
+using SoundFingerprinting.Extensions.LMDB.Exceptions;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
@@ -94,7 +95,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
                     if (counter != (buffer.Length - 1))
                     {
-                        throw new Exception("Bad buffer length");
+                        throw new BadBufferLengthException("Bad buffer length");
                     }
                 }
             }
@@ -104,9 +105,6 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             return buffer != null ? buffer : new Span<ulong>();
 #pragma warning restore IDE0029 // Use coalesce expression
 #pragma warning restore RCS1084 // Use coalesce expression instead of conditional expression.
-
-            // FIXME : probably Visual Studio bug
-            // return buffer ?? new Span<ulong>();
         }
     }
 }
