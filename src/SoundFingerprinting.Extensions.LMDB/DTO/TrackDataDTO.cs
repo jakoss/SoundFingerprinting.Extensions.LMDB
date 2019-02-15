@@ -1,4 +1,5 @@
-﻿using MessagePack;
+﻿using System.Collections.Generic;
+using MessagePack;
 using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
 using SoundFingerprinting.Data;
@@ -15,6 +16,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             Title = trackInfo.Title;
             Length = trackInfo.DurationInSeconds;
             TrackReference = (ulong)modelReference.Id;
+            MetaFields = trackInfo.MetaFields;
         }
 
         internal TrackDataDTO(TrackData trackData)
@@ -24,6 +26,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             Title = trackData.Title;
             Length = trackData.Length;
             TrackReference = (ulong)trackData.TrackReference.Id;
+            MetaFields = trackData.MetaFields;
         }
 
         public TrackDataDTO()
@@ -46,10 +49,13 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
 
         [Key(5)]
         public ulong TrackReference { get; set; }
+        
+        [Key(6)]
+        public IDictionary<string, string> MetaFields { get; set; }
 
         internal TrackData ToTrackData()
         {
-            return new TrackData(Id, Artist, Title, string.Empty, 0, Length, new ModelReference<ulong>(TrackReference));
+            return new TrackData(Id, Artist, Title, string.Empty, 0, Length, new ModelReference<ulong>(TrackReference), MetaFields);
         }
     }
 }

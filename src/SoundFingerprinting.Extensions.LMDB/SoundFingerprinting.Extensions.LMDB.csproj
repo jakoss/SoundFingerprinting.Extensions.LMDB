@@ -10,12 +10,10 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>soundfingerprinting database lmdb</PackageTags>
     <Description>Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.</Description>
-    <Version>6.0.0.0</Version>
+    <Version>6.1.1.0</Version>
     <LangVersion>latest</LangVersion>
     <PackageReleaseNotes>
-      Version 6.0.0.0 brings integration with new version of SoundFingerprinting ModelService.
-
-      Version 6.0.0.0 is NOT backwards compatibile! You'll need to rebuild database from the ground after the update.
+      Version 6.1.1.0 brings integration with new version of SoundFingerprinting nad MetaFields.
     </PackageReleaseNotes>
   </PropertyGroup>
 
@@ -29,7 +27,7 @@
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
-    <PackageReference Include="SoundFingerprinting" Version="6.0.0" />
+    <PackageReference Include="SoundFingerprinting" Version="6.1.1" />
     <PackageReference Include="Spreads.LMDB" Version="1.0.0-build1811161327" />
   </ItemGroup>
 </Project>
