@@ -71,7 +71,7 @@ Huge thanks to all library creators for making this all possible.
 - [SoundFingerprinting](https://github.com/AddictedCS/soundfingerprinting)
 - [LMDB](https://github.com/LMDB)
 - [Spreads.LMDB (.NET wrapper over LMDB)](https://github.com/Spreads/Spreads.LMDB)
-- [ZeroFormatter (the fastest binary serializer available right now)](https://github.com/neuecc/ZeroFormatter)
+- [MessagePack (extremly fast binary serializer)](https://github.com/neuecc/MessagePack-CSharp)
 
 ## Performance
 
