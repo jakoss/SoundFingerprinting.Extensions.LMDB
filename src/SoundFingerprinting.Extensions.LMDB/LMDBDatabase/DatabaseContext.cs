@@ -28,10 +28,10 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 throw new BadRuntimeException();
             }
 
-            var lmdbOpenFlags = DbEnvironmentFlags.NoMemInit;
+            var lmdbOpenFlags = LMDBEnvironmentFlags.NoMemInit;
             if (unsafeAsync)
             {
-                lmdbOpenFlags = lmdbOpenFlags | DbEnvironmentFlags.MapAsync | DbEnvironmentFlags.NoLock | DbEnvironmentFlags.WriteMap;
+                lmdbOpenFlags = lmdbOpenFlags | LMDBEnvironmentFlags.MapAsync | LMDBEnvironmentFlags.NoLock | LMDBEnvironmentFlags.WriteMap;
             }
             environment = LMDBEnvironment.Create(pathToDatabase, lmdbOpenFlags, disableAsync: true);
             environment.MapSize = mapSize;

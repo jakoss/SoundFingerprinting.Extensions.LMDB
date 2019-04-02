@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using MessagePack;
+﻿using MessagePack;
 using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
 using SoundFingerprinting.Data;
+using System.Collections.Generic;
 
 namespace SoundFingerprinting.Extensions.LMDB.DTO
 {
@@ -49,7 +49,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
 
         [Key(5)]
         public ulong TrackReference { get; set; }
-        
+
         [Key(6)]
         public IDictionary<string, string> MetaFields { get; set; }
 

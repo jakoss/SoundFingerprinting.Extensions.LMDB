@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.11.4" />
-    <PackageReference Include="SoundFingerprinting" Version="6.1.1" />
+    <PackageReference Include="SoundFingerprinting" Version="6.2.0" />
   </ItemGroup>
 
   <ItemGroup>
