@@ -36,17 +36,15 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (disposedValue) return;
+            databaseContext.Dispose();
+
+            if (disposing)
             {
-                databaseContext.Dispose();
-
-                if (disposing)
-                {
-                    GC.SuppressFinalize(this);
-                }
-
-                disposedValue = true;
+                GC.SuppressFinalize(this);
             }
+
+            disposedValue = true;
         }
 
         public void Dispose()

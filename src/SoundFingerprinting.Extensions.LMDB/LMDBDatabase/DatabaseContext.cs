@@ -7,6 +7,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
     internal sealed class DatabaseContext : IDisposable
     {
         private int HashTablesCount { get; }
+        private bool disposed;
 
         private readonly LMDBEnvironment environment;
         private readonly DatabasesHolder databasesHolder;
@@ -73,24 +74,36 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
         public void CopyAndCompactLmdbDatabase(string newPath)
         {
+            ThrowIfDisposed();
             environment.CopyTo(newPath, true);
         }
 
         public ReadOnlyTransaction OpenReadOnlyTransaction()
         {
+            ThrowIfDisposed();
             return new ReadOnlyTransaction(environment.BeginReadOnlyTransaction(), databasesHolder, indexesHolder);
         }
 
         public ReadWriteTransaction OpenReadWriteTransaction()
         {
+            ThrowIfDisposed();
             return new ReadWriteTransaction(environment.BeginTransaction(), databasesHolder, indexesHolder);
         }
 
         public void Dispose()
         {
+            if (disposed) return;
             databasesHolder.Dispose();
             indexesHolder.Dispose();
             environment.Dispose();
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (disposed)
+            {
+                throw new ObjectDisposedException("Cannot use already disposed LMDBModelService");
+            }
         }
     }
 }

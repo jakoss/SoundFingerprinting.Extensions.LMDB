@@ -20,6 +20,8 @@ or using `dotnet cli`
 dotnet add package SoundFingerprinting.Extensions.LMDB
 ```
 
+As a requirement from dependent library `Spreads.LMDB` you have to provide native lmdb library yourself (considering your application architecture target). Take proper native library from [here](https://github.com/Spreads/Spreads.LMDB/tree/master/lib/runtimes) and make sure it always get copied to your compiled application folder (the simplest way is to attach this file to project and mark it as "Copy on Build").
+
 To use LMDB database with SoundFingerprinting create `LMDBModelService` object and use it in algorithm, like this:
 
 ```csharp

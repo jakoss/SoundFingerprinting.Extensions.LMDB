@@ -8,7 +8,7 @@ using SoundFingerprinting.Extensions.LMDB.Exceptions;
 
 namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 {
-    internal class BaseTransaction
+    internal abstract class BaseTransaction
     {
         private readonly DatabasesHolder databasesHolder;
         private readonly IndexesHolder indexesHolder;
