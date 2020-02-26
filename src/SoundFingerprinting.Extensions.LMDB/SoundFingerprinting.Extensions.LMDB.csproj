@@ -26,8 +26,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="1.7.3.7" />
-    <PackageReference Include="SoundFingerprinting" Version="7.0.0" />
-    <PackageReference Include="Spreads.LMDB" Version="2019.0.915" />
+    <PackageReference Include="MessagePack" Version="2.1.90" />
+    <PackageReference Include="SoundFingerprinting" Version="7.1.0" />
+    <PackageReference Include="Spreads.LMDB" Version="2020.0.114" />
   </ItemGroup>
 </Project>
