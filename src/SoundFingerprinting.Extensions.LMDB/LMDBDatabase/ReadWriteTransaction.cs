@@ -65,7 +65,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         public void PutSubFingerprint(SubFingerprintDataDTO subFingerprintDataDTO)
         {
             var subFingerprintKey = BitConverter.GetBytes(subFingerprintDataDTO.SubFingerprintReference).AsMemory();
-            var subFingerprintValue = LZ4MessagePackSerializer.Serialize(subFingerprintDataDTO).AsMemory();
+            var subFingerprintValue = MessagePackSerializer.Serialize(subFingerprintDataDTO, options: serializerOptions).AsMemory();
 
             using (subFingerprintKey.Pin())
             {
@@ -91,10 +91,8 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             var key = hash;
             var value = id;
 
-            using (var cursor = tableDatabase.OpenCursor(tx))
-            {
-                cursor.TryPut(ref key, ref value, CursorPutOptions.None);
-            }
+            using var cursor = tableDatabase.OpenCursor(tx);
+            cursor.TryPut(ref key, ref value, CursorPutOptions.None);
         }
 
         public void PutTrack(TrackDataDTO trackDataDTO)
@@ -115,7 +113,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             }
 
             var trackKey = BitConverter.GetBytes(trackDataDTO.TrackReference).AsMemory();
-            var trackValue = LZ4MessagePackSerializer.Serialize(trackDataDTO).AsMemory();
+            var trackValue = MessagePackSerializer.Serialize(trackDataDTO, options: serializerOptions).AsMemory();
 
             using (trackKey.Pin())
             {
@@ -191,11 +189,9 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 using (trackKey.Pin())
                 {
                     var trackKeyBuffer = new DirectBuffer(trackKey.Span);
-                    using (var cursor = indexesHolder.TracksSubfingerprintsIndex.OpenCursor(tx))
-                    {
-                        if (cursor.TryGet(ref trackKeyBuffer, ref keyBuffer, CursorGetOption.GetBoth))
-                            cursor.Delete(false);
-                    }
+                    using var cursor = indexesHolder.TracksSubfingerprintsIndex.OpenCursor(tx);
+                    if (cursor.TryGet(ref trackKeyBuffer, ref keyBuffer, CursorGetOption.GetBoth))
+                        cursor.Delete(false);
                 }
             }
         }
@@ -206,11 +202,9 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             var hashKey = hash;
             var value = id;
 
-            using (var cursor = tableDatabase.OpenCursor(tx))
-            {
-                if (cursor.TryGet(ref hashKey, ref value, CursorGetOption.GetBoth))
-                    cursor.Delete(false);
-            }
+            using var cursor = tableDatabase.OpenCursor(tx);
+            if (cursor.TryGet(ref hashKey, ref value, CursorGetOption.GetBoth))
+                cursor.Delete(false);
         }
 
         public void Commit()

@@ -15,7 +15,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
         private LMDBModelService lmdbModelService;
         private InMemoryModelService inMemoryModelService;
         private IAudioService audioService;
-        public const string refs_path = @"C:\Users\Jakub\Desktop\test_refs\waves";
+        public const string refs_path = @"E:\RM\tracks\extended";
 
         [GlobalSetup]
         public void Setup()
@@ -36,20 +36,21 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
         [ArgumentsSource(nameof(Files))]
         public QueryResult InMemoryRecognitions(string audioFile)
         {
-            return QueryCommandBuilder.Instance.BuildQueryCommand()
-                .From(Path.Combine(refs_path, audioFile))
-                .UsingServices(inMemoryModelService, audioService)
-                .Query()
-                .Result;
+            return RunQuery(audioFile, inMemoryModelService);
         }
 
         [Benchmark]
         [ArgumentsSource(nameof(Files))]
         public QueryResult LMDBRecognitions(string audioFile)
         {
+            return RunQuery(audioFile, lmdbModelService);
+        }
+
+        private QueryResult RunQuery(string audioFile, IModelService modelService)
+        {
             return QueryCommandBuilder.Instance.BuildQueryCommand()
                 .From(Path.Combine(refs_path, audioFile))
-                .UsingServices(lmdbModelService, audioService)
+                .UsingServices(modelService, audioService)
                 .Query()
                 .Result;
         }

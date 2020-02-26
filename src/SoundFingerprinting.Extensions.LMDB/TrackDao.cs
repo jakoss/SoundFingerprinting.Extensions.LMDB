@@ -23,116 +23,98 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         public int DeleteTrack(IModelReference trackReference)
         {
-            using (var tx = databaseContext.OpenReadWriteTransaction())
+            using var tx = databaseContext.OpenReadWriteTransaction();
+            try
             {
-                try
-                {
-                    var trackId = (ulong)trackReference.Id;
-                    var trackData = tx.GetTrackById(trackId);
-                    if (trackData == null) throw new TrackNotFoundException(trackId);
-                    tx.RemoveTrack(trackData);
+                var trackId = (ulong)trackReference.Id;
+                var trackData = tx.GetTrackById(trackId);
+                if (trackData == null) throw new TrackNotFoundException(trackId);
+                tx.RemoveTrack(trackData);
 
-                    tx.Commit();
-                    return 1;
-                }
-                catch (Exception)
-                {
-                    tx.Abort();
-                    throw;
-                }
+                tx.Commit();
+                return 1;
+            }
+            catch (Exception)
+            {
+                tx.Abort();
+                throw;
             }
         }
 
         public void InsertTrack(TrackData track)
         {
-            using (var tx = databaseContext.OpenReadWriteTransaction())
+            using var tx = databaseContext.OpenReadWriteTransaction();
+            try
             {
-                try
-                {
-                    var newTrack = new TrackDataDTO(track);
+                var newTrack = new TrackDataDTO(track);
 
-                    tx.PutTrack(newTrack);
+                tx.PutTrack(newTrack);
 
-                    tx.Commit();
-                }
-                catch (Exception)
-                {
-                    tx.Abort();
-                    throw;
-                }
+                tx.Commit();
+            }
+            catch (Exception)
+            {
+                tx.Abort();
+                throw;
             }
         }
 
-        public TrackData InsertTrack(TrackInfo track)
+        public TrackData InsertTrack(TrackInfo track, double durationInSeconds)
         {
-            using (var tx = databaseContext.OpenReadWriteTransaction())
+            using var tx = databaseContext.OpenReadWriteTransaction();
+            try
             {
-                try
-                {
-                    var newTrackId = tx.GetLastTrackId();
-                    newTrackId++;
-                    var trackReference = new ModelReference<ulong>(newTrackId);
-                    var newTrack = new TrackDataDTO(track, trackReference);
+                var newTrackId = tx.GetLastTrackId();
+                newTrackId++;
+                var trackReference = new ModelReference<ulong>(newTrackId);
+                var newTrack = new TrackDataDTO(track, durationInSeconds, trackReference);
 
-                    tx.PutTrack(newTrack);
+                tx.PutTrack(newTrack);
 
-                    tx.Commit();
-                    return newTrack.ToTrackData();
-                }
-                catch (Exception)
-                {
-                    tx.Abort();
-                    throw;
-                }
+                tx.Commit();
+                return newTrack.ToTrackData();
+            }
+            catch (Exception)
+            {
+                tx.Abort();
+                throw;
             }
         }
 
         public IEnumerable<TrackData> ReadAll()
         {
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            foreach (var track in tx.GetAllTracks())
             {
-                foreach (var track in tx.GetAllTracks())
-                {
-                    yield return track.ToTrackData();
-                }
-            }
-        }
-
-        public TrackData ReadTrack(IModelReference trackReference)
-        {
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
-            {
-                return tx.GetTrackByReference((ulong)trackReference.Id)?.ToTrackData();
+                yield return track.ToTrackData();
             }
         }
 
         public IEnumerable<TrackData> ReadTrackByTitle(string title)
         {
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
-            {
-                return tx.GetTracksByTitle(title).Select(e => e.ToTrackData());
-            }
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            return tx.GetTracksByTitle(title).Select(e => e.ToTrackData());
         }
 
         public TrackData ReadTrackById(string id)
         {
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
-            {
-                return tx.GetTrackById(id)?.ToTrackData();
-            }
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            return tx.GetTrackById(id)?.ToTrackData();
         }
 
         public IEnumerable<TrackData> ReadTracksByReferences(IEnumerable<IModelReference> references)
         {
-            return references.Select(ReadTrack);
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            foreach (var trackReference in references)
+            {
+                yield return tx.GetTrackByReference((ulong)trackReference.Id)?.ToTrackData();
+            }
         }
 
         private int GetTracksCount()
         {
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
-            {
-                return tx.GetTracksCount();
-            }
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            return tx.GetTracksCount();
         }
     }
 }

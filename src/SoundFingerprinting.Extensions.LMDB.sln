@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2003
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundFingerprinting.Extensions.LMDB", "SoundFingerprinting.Extensions.LMDB\SoundFingerprinting.Extensions.LMDB.csproj", "{B96D4F64-FF6C-4DDA-880A-45E6A59F281D}"
 EndProject
@@ -11,6 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundFingerprinting.Extensi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A4B8554C-B001-4D7A-B6AF-3A96AA980076}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		..\.gitattributes = ..\.gitattributes
 		..\.gitignore = ..\.gitignore
 		..\LICENSE = ..\LICENSE

@@ -41,15 +41,21 @@
             return (int[])genericHashBucketsArray.Clone();
         }
 
-        protected void AssertTracksAreEqual(TrackInfo expectedTrack, TrackData actualTrack)
+        protected static void AssertTracksAreEqual(TrackInfo expectedTrack, TrackData actualTrack)
         {
             expectedTrack.Artist.Should().BeEquivalentTo(actualTrack.Artist);
             expectedTrack.Title.Should().BeEquivalentTo(actualTrack.Title);
-            expectedTrack.DurationInSeconds.Should().Be(actualTrack.Length);
-            expectedTrack.Id.Should().BeEquivalentTo(actualTrack.ISRC);
+            expectedTrack.Id.Should().BeEquivalentTo(actualTrack.Id);
         }
 
-        protected void AssertModelReferenceIsInitialized(IModelReference modelReference)
+        protected static void AssertTracksAreEqual(TrackInfo expectedTrack, TrackInfo actualTrack)
+        {
+            expectedTrack.Artist.Should().BeEquivalentTo(actualTrack.Artist);
+            expectedTrack.Title.Should().BeEquivalentTo(actualTrack.Title);
+            expectedTrack.Id.Should().BeEquivalentTo(actualTrack.Id);
+        }
+
+        protected static void AssertModelReferenceIsInitialized(IModelReference modelReference)
         {
             modelReference.Should().NotBeNull();
             modelReference.GetHashCode().Should().NotBe(0);

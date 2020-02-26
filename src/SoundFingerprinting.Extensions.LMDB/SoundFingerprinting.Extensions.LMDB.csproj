@@ -3,17 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Jakub Syty</Authors>
-    <Company>EUVIC</Company>
+    <Company>Euvic</Company>
     <PackageProjectUrl>https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>soundfingerprinting database lmdb</PackageTags>
     <Description>Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.</Description>
-    <Version>7.0.0.0</Version>
+    <Version>7.1.0.1</Version>
     <LangVersion>latest</LangVersion>
     <PackageReleaseNotes>
-      Version 7.0.0.0 brings integration with new version of SoundFingerprinting.
+      Version 7.1.0.0 brings integration with new version of SoundFingerprinting and with MessagePack V2. This is not backwards compatibile!
     </PackageReleaseNotes>
   </PropertyGroup>
 
@@ -26,8 +26,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="1.7.3.7" />
-    <PackageReference Include="SoundFingerprinting" Version="7.0.0" />
-    <PackageReference Include="Spreads.LMDB" Version="2019.0.915" />
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.1.90" />
+    <PackageReference Include="SoundFingerprinting" Version="7.1.0" />
+    <PackageReference Include="Spreads.LMDB" Version="2020.0.114" />
   </ItemGroup>
 </Project>

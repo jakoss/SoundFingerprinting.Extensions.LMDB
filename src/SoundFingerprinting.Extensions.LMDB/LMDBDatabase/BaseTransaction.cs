@@ -13,6 +13,10 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         private readonly DatabasesHolder databasesHolder;
         private readonly IndexesHolder indexesHolder;
 
+        protected readonly MessagePackSerializerOptions serializerOptions = MessagePackSerializerOptions.Standard
+            .WithCompression(MessagePackCompression.Lz4BlockArray)
+            .WithAllowAssemblyVersionMismatch(true);
+
         protected BaseTransaction(DatabasesHolder databasesHolder, IndexesHolder indexesHolder)
         {
             this.databasesHolder = databasesHolder;
@@ -23,7 +27,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         {
             if (databasesHolder.TracksDatabase.TryGet(transaction, ref id, out var value))
             {
-                return LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(value.Span.ToArray());
+                return MessagePackSerializer.Deserialize<TrackDataDTO>(value.Span.ToArray(), options: serializerOptions);
             }
 
             return null;
@@ -37,7 +41,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
                 var keyBuffer = new DirectBuffer(subFingerprintKey.Span);
                 if (databasesHolder.SubFingerprintsDatabase.TryGet(transaction, ref keyBuffer, out var value))
                 {
-                    return LZ4MessagePackSerializer.Deserialize<SubFingerprintDataDTO>(value.Span.ToArray());
+                    return MessagePackSerializer.Deserialize<SubFingerprintDataDTO>(value.Span.ToArray(), options: serializerOptions);
                 }
 
                 throw new KeyNotFoundException();

@@ -15,24 +15,24 @@
 
         private readonly object locker = new object();
 
-        protected void AssertHashDatasAreTheSame(IList<HashedFingerprint> firstHashDatas, IList<HashedFingerprint> secondHashDatas)
+        protected void AssertHashDatasAreTheSame(Hashes firstHashDatas, IList<HashedFingerprint> secondHashDatas)
         {
             firstHashDatas.Count.Should().Be(secondHashDatas.Count);
 
             // hashes are not ordered as parallel computation is involved
-            firstHashDatas = SortHashesBySequenceNumber(firstHashDatas);
-            secondHashDatas = SortHashesBySequenceNumber(secondHashDatas);
+            var localFirstHashDatas = SortHashesBySequenceNumber(firstHashDatas);
+            var localSecondHashDatas = SortHashesBySequenceNumber(secondHashDatas);
 
             for (int i = 0; i < firstHashDatas.Count; i++)
             {
-                firstHashDatas[i].SequenceNumber.Should().Be(secondHashDatas[i].SequenceNumber);
-                firstHashDatas[i].StartsAt.Should().BeApproximately(secondHashDatas[i].StartsAt, (float)Epsilon);
+                localFirstHashDatas[i].SequenceNumber.Should().Be(localSecondHashDatas[i].SequenceNumber);
+                localFirstHashDatas[i].StartsAt.Should().BeApproximately(localSecondHashDatas[i].StartsAt, (float)Epsilon);
 
-                firstHashDatas[i].HashBins.Should().BeEquivalentTo(secondHashDatas[i].HashBins);
+                localFirstHashDatas[i].HashBins.Should().BeEquivalentTo(localSecondHashDatas[i].HashBins);
             }
         }
 
-        protected TagInfo GetTagInfo(int number)
+        protected static TagInfo GetTagInfo(int number)
         {
             return new TagInfo
             {
