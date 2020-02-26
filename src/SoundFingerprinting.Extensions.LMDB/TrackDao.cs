@@ -105,10 +105,10 @@ namespace SoundFingerprinting.Extensions.LMDB
         public IEnumerable<TrackData> ReadTracksByReferences(IEnumerable<IModelReference> references)
         {
             using var tx = databaseContext.OpenReadOnlyTransaction();
-            return references.Select(trackReference =>
+            foreach (var trackReference in references)
             {
-                return tx.GetTrackByReference((ulong)trackReference.Id)?.ToTrackData();
-            });
+                yield return tx.GetTrackByReference((ulong)trackReference.Id)?.ToTrackData();
+            }
         }
 
         private int GetTracksCount()

@@ -50,14 +50,6 @@ You need to build your application targeting x64 architecture, since LMDB suppor
 
 It's **VERY** important to dispose modelService after usage (although it's best to keep instance for whole application life and dispose it on application closing). Not doing it might cause memory dump, which tries to dump whole VirtualMemory of process. Memory Mapped File is part of VirtualMemory, so it will be dumped as well. That might result in system getting unresponsive for even a couple of minutes!
 
-## Updates
-
-Version **5.2.2.3** brings totally new LMDB .NET wrapper. It uses `Span` and `Memory` constructs to bring zero-copy reads from LMDB library. This means whole new level of optimization in .NET Core 2.1 (and newer) runtimes. It still work on .NET Framework, but it doesn't have these optimizations implemented. Optimizations are mainly in allocation counts. Older version on single recognition could allocate even 250 MB. New version does the same little bit faster while allocating only 1.5 KB!
-
-Please note that this new .NET wrapper is in preview now. **It require MyGet feed** in NuGet configuration to get it's dependencies. I'm using it in production and i do not note any problems with stability so far.
-
-Version **5.2.2.3** is **NOT** backwards compatibile in any way. You'll need to rebuild database from the ground after the update.
-
 ## Technical details
 
 LMDB itself is very fast key-value database based on B+Tree and Memory Mapped File.
@@ -81,7 +73,7 @@ Benchmark (source is in repo) is made using 10 sample tracks. `LMDBModelService`
 
 I'm using this adapter in production with 4000 tracks in database. As far as i can tell - 10-20% performance difference still apply on such dataset. I'd love if somebody could test this out on bigger dataset and share his experience.
 
-As you can see in the benchmark - .NET Core 2.1 is much more optimized to work with this adapter. Scaled performance is better, but not so much. But allocations can get crazy low - from 250MB on .NET Framework to 1.4KB on .NET Core 2.1. This is because .NET Core 2.1 can take advantage of `Span` and `Memory` constructs leading to zero-copy reads from LMDB database. So i strongly recommend using .NET Core 2.1 (or newer) to get the best performance and allocation count.
+As you can see in the benchmark - .NET Core is much more optimized to work with this adapter. Scaled performance is better, but not so much. But allocations can get crazy low - from 250MB on .NET Framework to 1.4KB on .NET Core. This is because .NET Core can take advantage of `Span` and `Memory` constructs leading to zero-copy reads from LMDB database. So i strongly recommend using .NET Core to get the best performance and allocation count.
 
 Whole benchmark results available [Here](https://github.com/Nekromancer/SoundFingerprinting.Extensions.LMDB/blob/master/Performance.md)
 

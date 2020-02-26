@@ -17,6 +17,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
 
             Add(HtmlExporter.Default);
             Add(MarkdownExporter.GitHub);
+            Add(RPlotExporter.Default);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
 {
     internal static class Program
     {
-        public static string databasesPath = @"C:\Users\Jakub\Desktop\test_refs\databases";
+        public static string databasesPath = @"E:\RM\SoundFingerprintingLMDB";
 
         private static void Main()
         {
@@ -42,6 +42,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
                 }
                 inMemoryModelService.Snapshot(Path.Combine(databasesPath, "memory.db"));
                 lmdbModelService.Dispose();
+
                 Console.WriteLine("Databases built");
             }
 
