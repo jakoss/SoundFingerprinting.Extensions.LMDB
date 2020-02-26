@@ -26,11 +26,9 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
                 {
                     var filename = Path.GetFileNameWithoutExtension(path);
 
-                    var duration = audioService.GetLengthInSeconds(path);
+                    Console.WriteLine($"Adding track {filename}");
 
-                    Console.WriteLine($"Adding track {filename} ({duration:0.00})");
-
-                    var track = new TrackInfo(filename, string.Empty, string.Empty, duration);
+                    var track = new TrackInfo(filename, string.Empty, string.Empty);
 
                     var hashedFingerprints = FingerprintCommandBuilder.Instance
                         .BuildFingerprintCommand()
@@ -39,8 +37,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
                         .Hash()
                         .Result;
 
-                    var lmdbTrackReference = lmdbModelService.Insert(track, hashedFingerprints);
-                    var inMemoryTrackReference = inMemoryModelService.Insert(track, hashedFingerprints);
+                    lmdbModelService.Insert(track, hashedFingerprints);
+                    inMemoryModelService.Insert(track, hashedFingerprints);
                 }
                 inMemoryModelService.Snapshot(Path.Combine(databasesPath, "memory.db"));
                 lmdbModelService.Dispose();

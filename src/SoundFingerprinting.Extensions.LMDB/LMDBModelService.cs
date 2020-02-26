@@ -18,6 +18,7 @@ namespace SoundFingerprinting.Extensions.LMDB
         }
 
         private LMDBModelService(DatabaseContext databaseContext) : base(
+            "lmdb-model-service",
             new TrackDao(databaseContext),
             new SubFingerprintDao(databaseContext)
         )

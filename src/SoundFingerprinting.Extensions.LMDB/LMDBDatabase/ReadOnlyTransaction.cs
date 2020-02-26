@@ -46,18 +46,14 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
         public int GetSubFingerprintsCount()
         {
-            using (var cursor = databasesHolder.SubFingerprintsDatabase.OpenReadOnlyCursor(tx))
-            {
-                return (int)cursor.Count();
-            }
+            using var cursor = databasesHolder.SubFingerprintsDatabase.OpenReadOnlyCursor(tx);
+            return (int)cursor.Count();
         }
 
         public int GetTracksCount()
         {
-            using (var cursor = databasesHolder.TracksDatabase.OpenReadOnlyCursor(tx))
-            {
-                return (int)cursor.Count();
-            }
+            using var cursor = databasesHolder.TracksDatabase.OpenReadOnlyCursor(tx);
+            return (int)cursor.Count();
         }
 
         public IEnumerable<int> GetHashCountsPerTable()
@@ -65,10 +61,8 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
             var counters = new List<int>();
             foreach (var table in databasesHolder.HashTables)
             {
-                using (var cursor = table.OpenReadOnlyCursor(tx))
-                {
-                    counters.Add((int)cursor.Count());
-                }
+                using var cursor = table.OpenReadOnlyCursor(tx);
+                counters.Add((int)cursor.Count());
             }
             return counters;
         }
@@ -76,7 +70,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         public IEnumerable<TrackDataDTO> GetAllTracks()
         {
             return databasesHolder.TracksDatabase.AsEnumerable(tx)
-                .Select(item => LZ4MessagePackSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray()));
+                .Select(item => MessagePackSerializer.Deserialize<TrackDataDTO>(item.Value.Span.ToArray(), options: serializerOptions));
         }
 
         public IEnumerable<TrackDataDTO> GetTracksByTitle(string title)
@@ -97,19 +91,17 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
 
             using (titleKey.Pin())
             {
-                using (var cursor = indexesHolder.TitleIndex.OpenReadOnlyCursor(tx))
+                using var cursor = indexesHolder.TitleIndex.OpenReadOnlyCursor(tx);
+                var keyBuffer = new DirectBuffer(titleKey.Span);
+                var valueBuffer = default(DirectBuffer);
+                if (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.Set)
+                    && cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.FirstDuplicate))
                 {
-                    var keyBuffer = new DirectBuffer(titleKey.Span);
-                    var valueBuffer = default(DirectBuffer);
-                    if (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.Set)
-                        && cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.FirstDuplicate))
+                    GetTrack(ref valueBuffer);
+
+                    while (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.NextDuplicate))
                     {
                         GetTrack(ref valueBuffer);
-
-                        while (cursor.TryGet(ref keyBuffer, ref valueBuffer, CursorGetOption.NextDuplicate))
-                        {
-                            GetTrack(ref valueBuffer);
-                        }
                     }
                 }
             }

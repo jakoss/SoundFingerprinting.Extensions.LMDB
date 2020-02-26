@@ -3,13 +3,13 @@ using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
 using SoundFingerprinting.Data;
 using SoundFingerprinting.Extensions.LMDB.DTO;
+using SoundFingerprinting.Extensions.LMDB.Exceptions;
 using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SoundFingerprinting.Extensions.LMDB.Exceptions;
 
 namespace SoundFingerprinting.Extensions.LMDB
 {
@@ -28,118 +28,109 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         public IEnumerable<SubFingerprintData> InsertHashDataForTrack(IEnumerable<HashedFingerprint> hashedFingerprints, IModelReference trackReference)
         {
-            using (var tx = databaseContext.OpenReadWriteTransaction())
+            using var tx = databaseContext.OpenReadWriteTransaction();
+            var trackId = (ulong)trackReference.Id;
+            var trackData = tx.GetTrackById(trackId);
+            if (trackData == null) throw new TrackNotFoundException(trackId);
+
+            var newSubFingerprintId = tx.GetLastSubFingerprintId();
+            var result = new List<SubFingerprintData>();
+
+            foreach (var hashedFingerprint in hashedFingerprints)
             {
-                var trackId = (ulong)trackReference.Id;
-                var trackData = tx.GetTrackById(trackId);
-                if (trackData == null) throw new TrackNotFoundException(trackId);
+                newSubFingerprintId++;
+                var subFingerprintReference = new ModelReference<ulong>(newSubFingerprintId);
+                var subFingerprint = new SubFingerprintDataDTO(hashedFingerprint.HashBins,
+                                        hashedFingerprint.SequenceNumber,
+                                        hashedFingerprint.StartsAt,
+                                        subFingerprintReference,
+                                        trackReference,
+                                        hashedFingerprint.Clusters);
+                tx.PutSubFingerprint(subFingerprint);
 
-                var newSubFingerprintId = tx.GetLastSubFingerprintId();
-                var result = new List<SubFingerprintData>();
-
-                foreach (var hashedFingerprint in hashedFingerprints)
+                // Insert hashes to hashTable
+                var table = 0;
+                foreach (var hash in hashedFingerprint.HashBins)
                 {
-                    newSubFingerprintId++;
-                    var subFingerprintReference = new ModelReference<ulong>(newSubFingerprintId);
-                    var subFingerprint = new SubFingerprintDataDTO(hashedFingerprint.HashBins,
-                                            hashedFingerprint.SequenceNumber,
-                                            hashedFingerprint.StartsAt,
-                                            subFingerprintReference,
-                                            trackReference,
-                                            hashedFingerprint.Clusters);
-                    tx.PutSubFingerprint(subFingerprint);
-
-                    // Insert hashes to hashTable
-                    var table = 0;
-                    foreach (var hash in hashedFingerprint.HashBins)
-                    {
-                        tx.PutSubFingerprintsByHashTableAndHash(table, hash, newSubFingerprintId);
-                        table++;
-                    }
-
-                    result.Add(subFingerprint.ToSubFingerprintData());
+                    tx.PutSubFingerprintsByHashTableAndHash(table, hash, newSubFingerprintId);
+                    table++;
                 }
 
-                tx.Commit();
-                return result;
+                result.Add(subFingerprint.ToSubFingerprintData());
             }
+
+            tx.Commit();
+            return result;
         }
 
         public void InsertSubFingerprints(IEnumerable<SubFingerprintData> subFingerprints)
         {
-            using (var tx = databaseContext.OpenReadWriteTransaction())
+            using var tx = databaseContext.OpenReadWriteTransaction();
+            foreach (var subFingerprint in subFingerprints)
             {
-                foreach (var subFingerprint in subFingerprints)
-                {
-                    var subFingerprintDto = new SubFingerprintDataDTO(subFingerprint);
-                    tx.PutSubFingerprint(subFingerprintDto);
-                }
+                var subFingerprintDto = new SubFingerprintDataDTO(subFingerprint);
+                tx.PutSubFingerprint(subFingerprintDto);
             }
         }
 
         public int DeleteSubFingerprintsByTrackReference(IModelReference trackReference)
         {
-            using (var tx = databaseContext.OpenReadWriteTransaction())
+            using var tx = databaseContext.OpenReadWriteTransaction();
+            try
             {
-                try
-                {
-                    var count = 0;
-                    var trackId = (ulong)trackReference.Id;
+                var count = 0;
+                var trackId = (ulong)trackReference.Id;
 
-                    foreach (var subFingerprint in tx.GetSubFingerprintsForTrack(trackId))
+                foreach (var subFingerprint in tx.GetSubFingerprintsForTrack(trackId))
+                {
+                    // Remove hashes from hashTable
+                    var table = 0;
+                    foreach (var hash in subFingerprint.Hashes)
                     {
-                        // Remove hashes from hashTable
-                        var table = 0;
-                        foreach (var hash in subFingerprint.Hashes)
-                        {
-                            tx.RemoveSubFingerprintsByHashTableAndHash(table, hash, subFingerprint.SubFingerprintReference);
-                            count++;
-                            table++;
-                        }
-
-                        tx.RemoveSubFingerprint(subFingerprint);
+                        tx.RemoveSubFingerprintsByHashTableAndHash(table, hash, subFingerprint.SubFingerprintReference);
                         count++;
+                        table++;
                     }
-                    tx.Commit();
-                    return count;
+
+                    tx.RemoveSubFingerprint(subFingerprint);
+                    count++;
                 }
-                catch (Exception)
-                {
-                    tx.Abort();
-                    throw;
-                }
+                tx.Commit();
+                return count;
+            }
+            catch (Exception)
+            {
+                tx.Abort();
+                throw;
             }
         }
 
         public IEnumerable<SubFingerprintData> ReadHashedFingerprintsByTrackReference(IModelReference trackReference)
         {
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
-            {
-                return tx.GetSubFingerprintsForTrack((ulong) trackReference.Id)
-                    .Select(subFingerprint => subFingerprint.ToSubFingerprintData())
-                    .ToList();
-            }
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            return tx.GetSubFingerprintsForTrack((ulong)trackReference.Id)
+                .Select(subFingerprint => subFingerprint.ToSubFingerprintData())
+                .ToList();
         }
 
         public IEnumerable<SubFingerprintData> ReadSubFingerprints(IEnumerable<int[]> hashes, QueryConfiguration queryConfiguration)
         {
             var allSubs = new ConcurrentBag<SubFingerprintData>();
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            Parallel.ForEach(hashes, hashedFingerprint =>
             {
-                Parallel.ForEach(hashes, hashedFingerprint =>
+                foreach (var subFingerprint in ReadSubFingerprints(
+                    hashedFingerprint,
+                    queryConfiguration.ThresholdVotes,
+                    queryConfiguration.Clusters,
+                    tx
+                ))
                 {
-                    foreach (var subFingerprint in ReadSubFingerprints(hashedFingerprint,
-                        queryConfiguration.ThresholdVotes,
-                        queryConfiguration.Clusters,
-                        tx
-                    ))
-                    {
-                        allSubs.Add(subFingerprint);
-                    }
-                });
+                    allSubs.Add(subFingerprint);
+                }
+            });
 
-                return allSubs.Distinct();
-            }
+            return allSubs.Distinct();
         }
 
         private IEnumerable<SubFingerprintData> ReadSubFingerprints(int[] hashes, int thresholdVotes, IEnumerable<string> assignedClusters,
@@ -152,7 +143,7 @@ namespace SoundFingerprinting.Extensions.LMDB
             if (clusters.Count > 0)
             {
                 return subFingerprints
-                    .Where(subFingerprint => 
+                    .Where(subFingerprint =>
                         subFingerprint.Clusters
                             .Intersect(clusters)
                             .Any())
@@ -184,18 +175,14 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         private int GetSubFingerprintCounts()
         {
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
-            {
-                return tx.GetSubFingerprintsCount();
-            }
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            return tx.GetSubFingerprintsCount();
         }
 
         private IEnumerable<int> GetHashCountsPerTable()
         {
-            using (var tx = databaseContext.OpenReadOnlyTransaction())
-            {
-                return tx.GetHashCountsPerTable();
-            }
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            return tx.GetHashCountsPerTable();
         }
     }
 }

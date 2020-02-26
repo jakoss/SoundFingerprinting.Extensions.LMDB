@@ -16,7 +16,7 @@ using Xunit;
 
 namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 {
-    public class TrackDaoFact : IntegrationWithSampleFilesTest, IDisposable
+    public sealed class TrackDaoFact : IntegrationWithSampleFilesTest, IDisposable
     {
         private readonly IAudioService audioService = new SoundFingerprintingAudioService();
         private readonly ITrackDao trackDao;
@@ -47,7 +47,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         {
             var track = GetTrack();
 
-            var trackReference = trackDao.InsertTrack(track).TrackReference;
+            var trackReference = trackDao.InsertTrack(track, 360).TrackReference;
 
             AssertModelReferenceIsInitialized(trackReference);
         }
@@ -58,7 +58,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             var modelReferences = new ConcurrentBag<IModelReference>();
             for (int i = 0; i < 1000; i++)
             {
-                var modelReference = trackDao.InsertTrack(new TrackInfo($"isrc{i}", "title", "artist", 200)).TrackReference;
+                var modelReference = trackDao.InsertTrack(new TrackInfo($"isrc{i}", "title", "artist"), 200).TrackReference;
 
                 modelReferences.Should().NotContain(modelReference);
                 modelReferences.Add(modelReference);
@@ -76,18 +76,18 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             TrackCount.Should().Be(tracks.Count);
             foreach (var expectedTrack in expectedTracks)
             {
-                tracks.Should().Contain(track => track.ISRC == expectedTrack.ISRC);
+                tracks.Should().Contain(track => track.Id == expectedTrack.Id);
             }
         }
 
         [Fact]
         public void ReadByIdFact()
         {
-            var track = new TrackInfo("isrc", "title", "artist", 200);
+            var track = new TrackInfo("isrc", "title", "artist");
 
-            var trackReference = trackDao.InsertTrack(track).TrackReference;
+            var trackData = trackDao.InsertTrack(track, 200);
 
-            AssertTracksAreEqual(track, trackDao.ReadTrack(trackReference));
+            AssertTracksAreEqual(track, trackDao.ReadTrackById(trackData.Id));
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         public void ReadTrackByTitleFact()
         {
             var track = GetTrack();
-            trackDao.InsertTrack(track);
+            trackDao.InsertTrack(track, 360);
 
             var tracks = trackDao.ReadTrackByTitle(track.Title).ToList();
 
@@ -126,7 +126,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         public void ReadTrackByIdFact()
         {
             var expectedTrack = GetTrack();
-            trackDao.InsertTrack(expectedTrack);
+            trackDao.InsertTrack(expectedTrack, 360);
 
             TrackData actualTrack = trackDao.ReadTrackById(expectedTrack.Id);
 
@@ -154,11 +154,11 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         public void DeleteOneTrackFact()
         {
             var track = GetTrack();
-            var trackReference = trackDao.InsertTrack(track).TrackReference;
+            var trackData = trackDao.InsertTrack(track, 360);
 
-            var count = trackDao.DeleteTrack(trackReference);
+            var count = trackDao.DeleteTrack(trackData.TrackReference);
 
-            trackDao.ReadTrack(trackReference).Should().BeNull();
+            trackDao.ReadTrackById(trackData.Id).Should().BeNull();
             count.Should().Be(1);
         }
 
@@ -166,8 +166,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         public void DeleteHashBinsAndSubfingerprintsOnTrackDelete()
         {
             TagInfo tagInfo = GetTagInfo(1);
-            var track = new TrackInfo(tagInfo.ISRC, tagInfo.Title, tagInfo.Artist, tagInfo.Duration);
-            var trackReference = trackDao.InsertTrack(track).TrackReference;
+            var track = new TrackInfo(tagInfo.ISRC, tagInfo.Title, tagInfo.Artist);
+            var trackReference = trackDao.InsertTrack(track, tagInfo.Duration).TrackReference;
             var hashData = FingerprintCommandBuilder.Instance
                 .BuildFingerprintCommand()
                 .From(GetAudioSamples())
@@ -196,12 +196,12 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void InsertTrackShouldAcceptEmptyEntriesCodes()
         {
-            var track = new TrackInfo("isrc", string.Empty, string.Empty, 200);
-            var trackReference = trackDao.InsertTrack(track).TrackReference;
+            var track = new TrackInfo("isrc", string.Empty, string.Empty);
+            var trackData = trackDao.InsertTrack(track, 200);
 
-            var actualTrack = trackDao.ReadTrack(trackReference);
+            var actualTrack = trackDao.ReadTrackById(trackData.Id);
 
-            AssertModelReferenceIsInitialized(trackReference);
+            AssertModelReferenceIsInitialized(trackData.TrackReference);
             AssertTracksAreEqual(track, actualTrack);
         }
 
@@ -211,7 +211,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             for (int i = 0; i < trackCount; i++)
             {
                 var track = GetTrack();
-                tracks.Add(trackDao.InsertTrack(track));
+                tracks.Add(trackDao.InsertTrack(track, 360));
             }
 
             return tracks;
@@ -219,7 +219,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
         private TrackInfo GetTrack()
         {
-            return new TrackInfo(Guid.NewGuid().ToString(), "title", "artist", 360);
+            return new TrackInfo(Guid.NewGuid().ToString(), "title", "artist");
         }
     }
 }

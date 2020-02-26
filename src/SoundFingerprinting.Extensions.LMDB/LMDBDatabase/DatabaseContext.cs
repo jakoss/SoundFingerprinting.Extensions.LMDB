@@ -93,6 +93,7 @@ namespace SoundFingerprinting.Extensions.LMDB.LMDBDatabase
         public void Dispose()
         {
             if (disposed) return;
+            disposed = true;
             databasesHolder.Dispose();
             indexesHolder.Dispose();
             environment.Dispose();

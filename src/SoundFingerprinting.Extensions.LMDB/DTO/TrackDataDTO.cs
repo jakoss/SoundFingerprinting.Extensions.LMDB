@@ -9,19 +9,19 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
     [MessagePackObject]
     public class TrackDataDTO
     {
-        internal TrackDataDTO(TrackInfo trackInfo, IModelReference modelReference)
+        internal TrackDataDTO(TrackInfo trackInfo, double duration, IModelReference modelReference)
         {
             Id = trackInfo.Id;
             Artist = trackInfo.Artist;
             Title = trackInfo.Title;
-            Length = trackInfo.DurationInSeconds;
+            Length = duration;
             TrackReference = (ulong)modelReference.Id;
             MetaFields = trackInfo.MetaFields;
         }
 
         internal TrackDataDTO(TrackData trackData)
         {
-            Id = trackData.ISRC;
+            Id = trackData.Id;
             Artist = trackData.Artist;
             Title = trackData.Title;
             Length = trackData.Length;
@@ -55,7 +55,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
 
         internal TrackData ToTrackData()
         {
-            return new TrackData(Id, Artist, Title, string.Empty, 0, Length, new ModelReference<ulong>(TrackReference), MetaFields);
+            return new TrackData(Id, Artist, Title, string.Empty, 0, Length, new ModelReference<ulong>(TrackReference), MetaFields, MediaType.Audio);
         }
     }
 }
