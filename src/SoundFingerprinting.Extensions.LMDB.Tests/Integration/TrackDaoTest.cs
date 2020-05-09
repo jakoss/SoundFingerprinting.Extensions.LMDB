@@ -19,7 +19,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
     public sealed class TrackDaoFact : IntegrationWithSampleFilesTest, IDisposable
     {
         private readonly IAudioService audioService = new SoundFingerprintingAudioService();
-        private readonly ITrackDao trackDao;
+        private readonly TrackDao trackDao;
         private readonly ISubFingerprintDao subFingerprintDao;
         private readonly DatabaseContext context;
         private readonly string tempDirectory;
@@ -68,12 +68,12 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void ReadAllTracksFact()
         {
-            const int TrackCount = 5;
-            var expectedTracks = InsertTracks(TrackCount);
+            const int trackCount = 5;
+            var expectedTracks = InsertTracks(trackCount);
 
             var tracks = trackDao.ReadAll().ToList();
 
-            TrackCount.Should().Be(tracks.Count);
+            trackCount.Should().Be(tracks.Count);
             foreach (var expectedTrack in expectedTracks)
             {
                 tracks.Should().Contain(track => track.Id == expectedTrack.Id);
@@ -93,8 +93,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void InsertMultipleTrackAtOnceFact()
         {
-            const int TrackCount = 100;
-            var tracks = InsertTracks(TrackCount);
+            const int trackCount = 100;
+            var tracks = InsertTracks(trackCount);
 
             var actualTracks = trackDao.ReadAll().ToList();
 
@@ -136,12 +136,12 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void DeleteCollectionOfTracksFact()
         {
-            const int NumberOfTracks = 10;
-            var tracks = InsertTracks(NumberOfTracks);
+            const int numberOfTracks = 10;
+            var tracks = InsertTracks(numberOfTracks);
 
             var allTracks = trackDao.ReadAll().ToList();
 
-            allTracks.Count.Should().Be(NumberOfTracks);
+            allTracks.Count.Should().Be(numberOfTracks);
             foreach (var track in tracks)
             {
                 trackDao.DeleteTrack(track.TrackReference);

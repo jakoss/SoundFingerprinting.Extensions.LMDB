@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using SoundFingerprinting.Configuration;
-using SoundFingerprinting.DAO;
 using SoundFingerprinting.Data;
 using System;
 using System.Collections.Generic;
@@ -69,22 +68,10 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         }
 
         [Fact]
-        public void ReadTrackByTitleTest()
-        {
-            var expectedTrack = new TrackInfo("isrc", "title", "artist");
-            modelService.Insert(expectedTrack, GetGenericHashesFingerprints());
-
-            var actualTracks = modelService.ReadTrackByTitle("title").ToList();
-
-            actualTracks.Count.Should().Be(1);
-            AssertTracksAreEqual(expectedTrack, actualTracks[0]);
-        }
-
-        [Fact]
         public void ReadMultipleTracksTest()
         {
-            const int NumberOfTracks = 100;
-            for (int i = 0; i < NumberOfTracks; i++)
+            const int numberOfTracks = 100;
+            for (var i = 0; i < numberOfTracks; i++)
             {
                 var track = new TrackInfo("isrc" + i, "title", "artist");
                 modelService.Insert(track, GetGenericHashesFingerprints());
@@ -92,7 +79,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
             var actualTracks = modelService.ReadAllTracks().ToList();
 
-            actualTracks.Count.Should().Be(NumberOfTracks);
+            actualTracks.Count.Should().Be(numberOfTracks);
         }
 
         [Fact]
@@ -103,7 +90,9 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
             modelService.DeleteTrack(track.Id);
 
-            var subFingerprints = modelService.Query(new[] { GenericHashBuckets() }, new DefaultQueryConfiguration()).ToList();
+            var subFingerprints = modelService.Query(
+                GetGenericHashesFingerprints(), new DefaultQueryConfiguration()).ToList();
+            
             subFingerprints.Should().BeEmpty();
             var actualTrack = modelService.ReadTrackById("irsc");
             actualTrack.Should().BeNull();
@@ -115,7 +104,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             var expectedTrack = new TrackInfo("isrc", "title", "artist");
             modelService.Insert(expectedTrack, GetGenericHashesFingerprints());
 
-            var subFingerprints = modelService.Query(new[] { GenericHashBuckets() }, new DefaultQueryConfiguration()).ToList();
+            var subFingerprints = modelService.Query(
+                GetGenericHashesFingerprints(), new DefaultQueryConfiguration()).ToList();
 
             subFingerprints.Count.Should().Be(1);
             var track = modelService.ReadAllTracks().First();
@@ -138,8 +128,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                 {
                     2, 2, 4, 5, 6, 7, 7, 9, 10, 11, 12, 13, 14, 14, 16, 17, 18, 19, 20, 20, 22, 23, 24, 25, 26
                 };
-            var firstHashData = new HashedFingerprint(firstTrackBuckets, 1, 0.928f, Enumerable.Empty<string>());
-            var secondHashData = new HashedFingerprint(secondTrackBuckets, 1, 0.928f, Enumerable.Empty<string>());
+            var firstHashData = new HashedFingerprint(firstTrackBuckets, 1, 0.928f, Array.Empty<byte>());
+            var secondHashData = new HashedFingerprint(secondTrackBuckets, 1, 0.928f, Array.Empty<byte>());
 
             modelService.Insert(firstTrack, new Hashes(new[] { firstHashData }, 200));
             modelService.Insert(secondTrack, new Hashes(new[] { secondHashData }, 200));
@@ -156,7 +146,9 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                     3, 2, 5, 6, 7, 8, 7, 10, 11, 12, 13, 14, 15, 14, 17, 18, 19, 20, 21, 20, 23, 24, 25, 26, 25
                 };
 
-            var subFingerprints = modelService.Query(new[] { queryBuckets }, new LowLatencyQueryConfiguration()).ToList();
+            var subFingerprints = modelService.Query(
+                new Hashes(new[] {new HashedFingerprint(queryBuckets, 0, 0f, Array.Empty<byte>())}, 200),
+                new LowLatencyQueryConfiguration()).ToList();
 
             subFingerprints.Count.Should().Be(1);
             firstTrackReference.Should().Be(subFingerprints[0].TrackReference);
@@ -165,8 +157,10 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
         [Fact]
         public void ReadSubFingerprintsByHashBucketsHavingThresholdWithGroupIdTest()
         {
-            var firstTrack = new TrackInfo("isrc1", "title", "artist");
-            var secondTrack = new TrackInfo("isrc2", "title", "artist");
+            var firstTrack = new TrackInfo("isrc1", "title", "artist", 
+                new Dictionary<string, string> {{"group-id", "first-group-id"}});
+            var secondTrack = new TrackInfo("isrc2", "title", "artist", 
+                new Dictionary<string, string> {{"group-id", "second-group-id"}});
 
             int[] firstTrackBuckets =
                 {
@@ -176,8 +170,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                 {
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
                 };
-            var firstHashData = new HashedFingerprint(firstTrackBuckets, 1, 0.928f, new[] { "first-group-id" });
-            var secondHashData = new HashedFingerprint(secondTrackBuckets, 1, 0.928f, new[] { "second-group-id" });
+            var firstHashData = new HashedFingerprint(firstTrackBuckets, 1, 0.928f, Array.Empty<byte>());
+            var secondHashData = new HashedFingerprint(secondTrackBuckets, 1, 0.928f, Array.Empty<byte>());
 
             modelService.Insert(firstTrack, new Hashes(new[] { firstHashData }, 200));
             modelService.Insert(secondTrack, new Hashes(new[] { secondHashData }, 200));
@@ -193,7 +187,12 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                     3, 2, 5, 6, 7, 8, 7, 10, 11, 12, 13, 14, 15, 14, 17, 18, 19, 20, 21, 20, 23, 24, 25, 26, 25
                 };
 
-            var subFingerprints = modelService.Query(new[] { queryBuckets }, new DefaultQueryConfiguration { Clusters = new HashSet<string>(new [] { "first-group-id" }) }).ToList();
+            var subFingerprints = modelService.Query(
+                new Hashes(new[] {new HashedFingerprint(queryBuckets, 0, 0f, Array.Empty<byte>())}, 200),
+                new DefaultQueryConfiguration
+                {
+                    MetaFieldsFilter = firstTrack.MetaFields
+                }).ToList();
 
             subFingerprints.Count.Should().Be(1);
             firstTrackReference.Should().Be(subFingerprints[0].TrackReference);
@@ -201,7 +200,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
         private Hashes GetGenericHashesFingerprints()
         {
-            return new Hashes(new[] { new HashedFingerprint(GenericHashBuckets(), 0, 0f, Enumerable.Empty<string>()) }, 200);
+            return new Hashes(new[] { new HashedFingerprint(GenericHashBuckets(), 0, 0f, Array.Empty<byte>()) }, 200);
         }
     }
 }
