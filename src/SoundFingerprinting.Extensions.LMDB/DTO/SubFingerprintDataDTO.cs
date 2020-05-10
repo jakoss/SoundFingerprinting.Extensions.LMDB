@@ -1,7 +1,6 @@
 ﻿using MessagePack;
 using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
-using System.Collections.Generic;
 
 namespace SoundFingerprinting.Extensions.LMDB.DTO
 {
@@ -13,15 +12,13 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
         }
 
         internal SubFingerprintDataDTO(int[] hashes, uint sequenceNumber, float sequenceAt,
-            IModelReference subFingerprintReference, IModelReference trackReference,
-            IEnumerable<string> clusters) : this()
+            IModelReference subFingerprintReference, IModelReference trackReference) : this()
         {
             Hashes = hashes;
             SubFingerprintReference = (ulong)subFingerprintReference.Id;
             TrackReference = (ulong)trackReference.Id;
             SequenceNumber = sequenceNumber;
             SequenceAt = sequenceAt;
-            Clusters = clusters;
         }
 
         internal SubFingerprintDataDTO(SubFingerprintData subFingerprintData)
@@ -29,7 +26,6 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             Hashes = subFingerprintData.Hashes;
             SequenceNumber = subFingerprintData.SequenceNumber;
             SequenceAt = subFingerprintData.SequenceAt;
-            Clusters = subFingerprintData.Clusters;
             SubFingerprintReference = (ulong)subFingerprintData.SubFingerprintReference.Id;
             TrackReference = (ulong)subFingerprintData.TrackReference.Id;
         }
@@ -43,9 +39,6 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
         [Key(3)]
         public float SequenceAt { get; set; }
 
-        [Key(4)]
-        public IEnumerable<string> Clusters { get; set; }
-
         [Key(5)]
         public ulong SubFingerprintReference { get; set; }
 
@@ -55,7 +48,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
         internal SubFingerprintData ToSubFingerprintData()
         {
             return new SubFingerprintData(
-                Hashes, SequenceNumber, SequenceAt, Clusters,
+                Hashes, SequenceNumber, SequenceAt,
                 new ModelReference<ulong>(SubFingerprintReference),
                 new ModelReference<ulong>(TrackReference)
             );

@@ -44,8 +44,7 @@ namespace SoundFingerprinting.Extensions.LMDB
                                         hashedFingerprint.SequenceNumber,
                                         hashedFingerprint.StartsAt,
                                         subFingerprintReference,
-                                        trackReference,
-                                        hashedFingerprint.Clusters);
+                                        trackReference);
                 tx.PutSubFingerprint(subFingerprint);
 
                 // Insert hashes to hashTable
@@ -122,7 +121,7 @@ namespace SoundFingerprinting.Extensions.LMDB
                 foreach (var subFingerprint in ReadSubFingerprints(
                     hashedFingerprint,
                     queryConfiguration.ThresholdVotes,
-                    queryConfiguration.Clusters,
+                    queryConfiguration.MetaFieldsFilter,
                     tx
                 ))
                 {
@@ -133,20 +132,25 @@ namespace SoundFingerprinting.Extensions.LMDB
             return allSubs.Distinct();
         }
 
-        private IEnumerable<SubFingerprintData> ReadSubFingerprints(int[] hashes, int thresholdVotes, IEnumerable<string> assignedClusters,
+        private IEnumerable<SubFingerprintData> ReadSubFingerprints(int[] hashes, int thresholdVotes,
+            IDictionary<string, string> metaFieldsFilter,
             ReadOnlyTransaction tx)
         {
             var subFingeprintIds = GetSubFingerprintMatches(hashes, thresholdVotes, tx);
             var subFingerprints = subFingeprintIds.Select(tx.GetSubFingerprint);
 
-            var clusters = assignedClusters as List<string> ?? assignedClusters.ToList();
-            if (clusters.Count > 0)
+            if (metaFieldsFilter.Any())
             {
                 return subFingerprints
-                    .Where(subFingerprint =>
-                        subFingerprint.Clusters
-                            .Intersect(clusters)
-                            .Any())
+                    .GroupBy(subFingerprint => subFingerprint.TrackReference)
+                    .Where(group =>
+                    {
+                        var trackData = tx.GetTrackByReference(group.Key);
+                        return trackData.MetaFields
+                            .Join(metaFieldsFilter, x => x.Key, x => x.Key, (a, b) => a.Value.Equals(b.Value))
+                            .Any(x => x);
+                    })
+                    .SelectMany(x => x.ToList())
                     .Select(e => e.ToSubFingerprintData());
             }
 
