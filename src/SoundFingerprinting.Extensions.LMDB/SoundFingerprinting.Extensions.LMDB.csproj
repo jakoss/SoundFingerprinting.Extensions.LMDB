@@ -10,10 +10,10 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>soundfingerprinting database lmdb</PackageTags>
     <Description>Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.</Description>
-    <Version>7.3.0.0</Version>
+    <Version>7.3.2.0</Version>
     <LangVersion>latest</LangVersion>
     <PackageReleaseNotes>
-      Version 7.3.0.0 brings integration with new version of SoundFingerprinting and with MessagePack V2. This is not backwards compatibile!
+      Version 7.3.2.0 brings integration with new version of SoundFingerprinting.
     </PackageReleaseNotes>
   </PropertyGroup>
 
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="2.1.90" />
+    <PackageReference Include="MessagePack" Version="2.1.115" />
     <PackageReference Include="SoundFingerprinting" Version="7.3.2" />
     <PackageReference Include="Spreads.LMDB" Version="2020.0.114" />
   </ItemGroup>
