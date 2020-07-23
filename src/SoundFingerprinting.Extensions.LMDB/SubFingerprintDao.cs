@@ -139,7 +139,7 @@ namespace SoundFingerprinting.Extensions.LMDB
             var subFingeprintIds = GetSubFingerprintMatches(hashes, thresholdVotes, tx);
             var subFingerprints = subFingeprintIds.Select(tx.GetSubFingerprint);
 
-            if (metaFieldsFilter.Any())
+            if (metaFieldsFilter.Count > 0)
             {
                 return subFingerprints
                     .GroupBy(subFingerprint => subFingerprint.TrackReference)

@@ -2,11 +2,11 @@
 using SoundFingerprinting.DAO.Data;
 using SoundFingerprinting.Data;
 using SoundFingerprinting.Extensions.LMDB.DTO;
+using SoundFingerprinting.Extensions.LMDB.Exceptions;
 using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SoundFingerprinting.Extensions.LMDB.Exceptions;
 
 namespace SoundFingerprinting.Extensions.LMDB
 {
@@ -87,6 +87,15 @@ namespace SoundFingerprinting.Extensions.LMDB
             foreach (var track in tx.GetAllTracks())
             {
                 yield return track.ToTrackData();
+            }
+        }
+
+        public IEnumerable<string> GetTrackIds()
+        {
+            using var tx = databaseContext.OpenReadOnlyTransaction();
+            foreach (var track in tx.GetAllTracks())
+            {
+                yield return track.Id;
             }
         }
 

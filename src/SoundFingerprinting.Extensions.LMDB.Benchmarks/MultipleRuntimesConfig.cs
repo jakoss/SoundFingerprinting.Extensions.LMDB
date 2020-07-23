@@ -11,13 +11,13 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
     {
         public MultipleRuntimesConfig()
         {
-            Add(MemoryDiagnoser.Default);
-            Add(Job.Default.With(CsProjCoreToolchain.NetCoreApp31).With(Platform.X64));
-            Add(Job.Default.With(CsProjClassicNetToolchain.Net48).With(Platform.X64));
+            AddDiagnoser(MemoryDiagnoser.Default);
+            AddJob(Job.Default.WithToolchain(CsProjCoreToolchain.NetCoreApp31).WithPlatform(Platform.X64));
+            AddJob(Job.Default.WithToolchain(CsProjClassicNetToolchain.Net48).WithPlatform(Platform.X64));
 
-            Add(HtmlExporter.Default);
-            Add(MarkdownExporter.GitHub);
-            Add(RPlotExporter.Default);
+            AddExporter(HtmlExporter.Default);
+            AddExporter(MarkdownExporter.GitHub);
+            AddExporter(RPlotExporter.Default);
         }
     }
 }

@@ -55,7 +55,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
 
         internal TrackData ToTrackData()
         {
-            return new TrackData(Id, Artist, Title, string.Empty, 0, Length, new ModelReference<ulong>(TrackReference), MetaFields, MediaType.Audio);
+            return new TrackData(Id, Artist, Title, Length, new ModelReference<ulong>(TrackReference), MetaFields, MediaType.Audio);
         }
     }
 }
