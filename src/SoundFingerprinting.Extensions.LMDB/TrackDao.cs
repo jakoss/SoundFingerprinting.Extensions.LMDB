@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace SoundFingerprinting.Extensions.LMDB
 {
-    internal class TrackDao : ITrackDao
+    internal class TrackDao
     {
         private readonly DatabaseContext databaseContext;
 
@@ -26,31 +26,13 @@ namespace SoundFingerprinting.Extensions.LMDB
             using var tx = databaseContext.OpenReadWriteTransaction();
             try
             {
-                var trackId = (ulong)trackReference.Id;
+                var trackId = trackReference.Get<ulong>();
                 var trackData = tx.GetTrackById(trackId);
                 if (trackData == null) throw new TrackNotFoundException(trackId);
                 tx.RemoveTrack(trackData);
 
                 tx.Commit();
                 return 1;
-            }
-            catch (Exception)
-            {
-                tx.Abort();
-                throw;
-            }
-        }
-
-        public void InsertTrack(TrackData track)
-        {
-            using var tx = databaseContext.OpenReadWriteTransaction();
-            try
-            {
-                var newTrack = new TrackDataDTO(track);
-
-                tx.PutTrack(newTrack);
-
-                tx.Commit();
             }
             catch (Exception)
             {
@@ -116,7 +98,7 @@ namespace SoundFingerprinting.Extensions.LMDB
             using var tx = databaseContext.OpenReadOnlyTransaction();
             foreach (var trackReference in references)
             {
-                yield return tx.GetTrackByReference((ulong)trackReference.Id)?.ToTrackData();
+                yield return tx.GetTrackByReference(trackReference.Get<ulong>())?.ToTrackData();
             }
         }
 

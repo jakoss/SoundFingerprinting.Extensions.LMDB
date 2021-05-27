@@ -20,7 +20,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
     {
         private readonly IAudioService audioService = new SoundFingerprintingAudioService();
         private readonly TrackDao trackDao;
-        private readonly ISubFingerprintDao subFingerprintDao;
+        private readonly SubFingerprintDao subFingerprintDao;
         private readonly DatabaseContext context;
         private readonly string tempDirectory;
 

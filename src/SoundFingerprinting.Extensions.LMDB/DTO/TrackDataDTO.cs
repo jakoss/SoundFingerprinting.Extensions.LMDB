@@ -15,7 +15,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             Artist = trackInfo.Artist;
             Title = trackInfo.Title;
             Length = duration;
-            TrackReference = (ulong)modelReference.Id;
+            TrackReference = modelReference.Get<ulong>();
             MetaFields = trackInfo.MetaFields;
         }
 
@@ -25,7 +25,7 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             Artist = trackData.Artist;
             Title = trackData.Title;
             Length = trackData.Length;
-            TrackReference = (ulong)trackData.TrackReference.Id;
+            TrackReference = trackData.TrackReference.Get<ulong>();
             MetaFields = trackData.MetaFields;
         }
 

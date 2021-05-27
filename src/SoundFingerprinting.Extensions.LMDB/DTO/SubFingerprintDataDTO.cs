@@ -15,8 +15,8 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             IModelReference subFingerprintReference, IModelReference trackReference) : this()
         {
             Hashes = hashes;
-            SubFingerprintReference = (ulong)subFingerprintReference.Id;
-            TrackReference = (ulong)trackReference.Id;
+            SubFingerprintReference = subFingerprintReference.Get<ulong>();
+            TrackReference = trackReference.Get<ulong>();
             SequenceNumber = sequenceNumber;
             SequenceAt = sequenceAt;
         }
@@ -26,8 +26,8 @@ namespace SoundFingerprinting.Extensions.LMDB.DTO
             Hashes = subFingerprintData.Hashes;
             SequenceNumber = subFingerprintData.SequenceNumber;
             SequenceAt = subFingerprintData.SequenceAt;
-            SubFingerprintReference = (ulong)subFingerprintData.SubFingerprintReference.Id;
-            TrackReference = (ulong)subFingerprintData.TrackReference.Id;
+            SubFingerprintReference = subFingerprintData.SubFingerprintReference.Get<ulong>();
+            TrackReference = subFingerprintData.TrackReference.Get<ulong>();
         }
 
         [Key(1)]

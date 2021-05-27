@@ -13,9 +13,10 @@ using System.Threading.Tasks;
 
 namespace SoundFingerprinting.Extensions.LMDB
 {
-    internal class SubFingerprintDao : ISubFingerprintDao
+    internal class SubFingerprintDao
     {
         private readonly DatabaseContext databaseContext;
+        private readonly IMetaFieldsFilter metaFieldsFilter = new MetaFieldsFilter();
 
         public int SubFingerprintsCount => GetSubFingerprintCounts();
 
@@ -29,7 +30,7 @@ namespace SoundFingerprinting.Extensions.LMDB
         public IEnumerable<SubFingerprintData> InsertHashDataForTrack(IEnumerable<HashedFingerprint> hashedFingerprints, IModelReference trackReference)
         {
             using var tx = databaseContext.OpenReadWriteTransaction();
-            var trackId = (ulong)trackReference.Id;
+            var trackId = trackReference.Get<ulong>();
             var trackData = tx.GetTrackById(trackId);
             if (trackData == null) throw new TrackNotFoundException(trackId);
 
@@ -62,23 +63,13 @@ namespace SoundFingerprinting.Extensions.LMDB
             return result;
         }
 
-        public void InsertSubFingerprints(IEnumerable<SubFingerprintData> subFingerprints)
-        {
-            using var tx = databaseContext.OpenReadWriteTransaction();
-            foreach (var subFingerprint in subFingerprints)
-            {
-                var subFingerprintDto = new SubFingerprintDataDTO(subFingerprint);
-                tx.PutSubFingerprint(subFingerprintDto);
-            }
-        }
-
         public int DeleteSubFingerprintsByTrackReference(IModelReference trackReference)
         {
             using var tx = databaseContext.OpenReadWriteTransaction();
             try
             {
                 var count = 0;
-                var trackId = (ulong)trackReference.Id;
+                var trackId = trackReference.Get<ulong>();
 
                 foreach (var subFingerprint in tx.GetSubFingerprintsForTrack(trackId))
                 {
@@ -107,7 +98,7 @@ namespace SoundFingerprinting.Extensions.LMDB
         public IEnumerable<SubFingerprintData> ReadHashedFingerprintsByTrackReference(IModelReference trackReference)
         {
             using var tx = databaseContext.OpenReadOnlyTransaction();
-            return tx.GetSubFingerprintsForTrack((ulong)trackReference.Id)
+            return tx.GetSubFingerprintsForTrack(trackReference.Get<ulong>())
                 .Select(subFingerprint => subFingerprint.ToSubFingerprintData())
                 .ToList();
         }
@@ -121,7 +112,8 @@ namespace SoundFingerprinting.Extensions.LMDB
                 foreach (var subFingerprint in ReadSubFingerprints(
                     hashedFingerprint,
                     queryConfiguration.ThresholdVotes,
-                    queryConfiguration.MetaFieldsFilter,
+                    queryConfiguration.YesMetaFieldsFilters,
+                    queryConfiguration.NoMetaFieldsFilters,
                     tx
                 ))
                 {
@@ -133,22 +125,22 @@ namespace SoundFingerprinting.Extensions.LMDB
         }
 
         private IEnumerable<SubFingerprintData> ReadSubFingerprints(int[] hashes, int thresholdVotes,
-            IDictionary<string, string> metaFieldsFilter,
+            IDictionary<string, string> yesMetaFieldsFilters,
+            IDictionary<string, string> noMetaFieldsFilters,
             ReadOnlyTransaction tx)
         {
             var subFingeprintIds = GetSubFingerprintMatches(hashes, thresholdVotes, tx);
             var subFingerprints = subFingeprintIds.Select(tx.GetSubFingerprint);
 
-            if (metaFieldsFilter.Count > 0)
+            if (yesMetaFieldsFilters.Count > 0 || noMetaFieldsFilters.Count > 0)
             {
                 return subFingerprints
                     .GroupBy(subFingerprint => subFingerprint.TrackReference)
                     .Where(group =>
                     {
                         var trackData = tx.GetTrackByReference(group.Key);
-                        return trackData.MetaFields
-                            .Join(metaFieldsFilter, x => x.Key, x => x.Key, (a, b) => a.Value.Equals(b.Value))
-                            .Any(x => x);
+                        var result = metaFieldsFilter.PassesFilters(trackData.MetaFields, yesMetaFieldsFilters, noMetaFieldsFilters);
+                        return result;
                     })
                     .SelectMany(x => x.ToList())
                     .Select(e => e.ToSubFingerprintData());

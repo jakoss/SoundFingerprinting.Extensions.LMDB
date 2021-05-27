@@ -18,8 +18,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
     {
         private readonly FingerprintCommandBuilder fingerprintCommandBuilder = new FingerprintCommandBuilder();
         private readonly IAudioService audioService = new SoundFingerprintingAudioService();
-        private readonly ITrackDao trackDao;
-        private readonly ISubFingerprintDao subFingerprintDao;
+        private readonly TrackDao trackDao;
+        private readonly SubFingerprintDao subFingerprintDao;
         private readonly DatabaseContext context;
         private readonly string tempDirectory;
 
@@ -129,21 +129,21 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                     new[] { hashedFingerprint.HashBins }, new DefaultQueryConfiguration
                     {
                         ThresholdVotes = thresholdVotes,
-                        MetaFieldsFilter = firstTrack.MetaFields
+                        YesMetaFieldsFilters = firstTrack.MetaFields
                     }).ToList();
 
                 subFingerprintData.Count.Should().Be(1);
-                firstTrackData.TrackReference.Should().BeEquivalentTo(subFingerprintData[0].TrackReference);
+                firstTrackData.TrackReference.Get<ulong>().Should().Be(subFingerprintData[0].TrackReference.Get<ulong>());
 
                 subFingerprintData = subFingerprintDao.ReadSubFingerprints(
                     new[] { hashedFingerprint.HashBins }, new DefaultQueryConfiguration
                     {
                         ThresholdVotes = thresholdVotes,
-                        MetaFieldsFilter = secondTrack.MetaFields
+                        YesMetaFieldsFilters = secondTrack.MetaFields
                     }).ToList();
 
                 subFingerprintData.Count.Should().Be(1);
-                secondTrackData.TrackReference.Should().BeEquivalentTo(subFingerprintData[0].TrackReference);
+                secondTrackData.TrackReference.Get<ulong>().Should().Be(subFingerprintData[0].TrackReference.Get<ulong>());
 
                 subFingerprintData = subFingerprintDao.ReadSubFingerprints(
                     new[] { hashedFingerprint.HashBins }, new DefaultQueryConfiguration

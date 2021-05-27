@@ -133,8 +133,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             var firstHashData = new HashedFingerprint(firstTrackBuckets, 1, 0.928f, Array.Empty<byte>());
             var secondHashData = new HashedFingerprint(secondTrackBuckets, 1, 0.928f, Array.Empty<byte>());
 
-            modelService.Insert(firstTrack, new Hashes(new[] { firstHashData }, 200));
-            modelService.Insert(secondTrack, new Hashes(new[] { secondHashData }, 200));
+            modelService.Insert(firstTrack, new Hashes(new[] { firstHashData }, 200, MediaType.Audio));
+            modelService.Insert(secondTrack, new Hashes(new[] { secondHashData }, 200, MediaType.Audio));
 
             // query buckets are similar with 5 elements from first track and 4 elements from second track
             int[] queryBuckets =
@@ -143,7 +143,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                 };
 
             var subFingerprints = modelService.Query(
-                new Hashes(new[] { new HashedFingerprint(queryBuckets, 0, 0f, Array.Empty<byte>()) }, 200),
+                new Hashes(new[] { new HashedFingerprint(queryBuckets, 0, 0f, Array.Empty<byte>()) }, 200, MediaType.Audio),
                 new LowLatencyQueryConfiguration()).ToList();
 
             subFingerprints.Count.Should().Be(1);
@@ -168,8 +168,8 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             var firstHashData = new HashedFingerprint(firstTrackBuckets, 1, 0.928f, Array.Empty<byte>());
             var secondHashData = new HashedFingerprint(secondTrackBuckets, 1, 0.928f, Array.Empty<byte>());
 
-            modelService.Insert(firstTrack, new Hashes(new[] { firstHashData }, 200));
-            modelService.Insert(secondTrack, new Hashes(new[] { secondHashData }, 200));
+            modelService.Insert(firstTrack, new Hashes(new[] { firstHashData }, 1.48d, MediaType.Audio, DateTime.Now, Enumerable.Empty<string>()));
+            modelService.Insert(secondTrack, new Hashes(new[] { secondHashData }, 1.48d, MediaType.Audio, DateTime.Now, Enumerable.Empty<string>()));
 
             // query buckets are similar with 5 elements from first track and 4 elements from second track
             int[] queryBuckets =
@@ -178,10 +178,10 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
                 };
 
             var subFingerprints = modelService.Query(
-                new Hashes(new[] { new HashedFingerprint(queryBuckets, 0, 0f, Array.Empty<byte>()) }, 200),
+                new Hashes(new[] { new HashedFingerprint(queryBuckets, 0, 0f, Array.Empty<byte>()) }, 1.48d, MediaType.Audio, DateTime.Now, Enumerable.Empty<string>()),
                 new DefaultQueryConfiguration
                 {
-                    MetaFieldsFilter = firstTrack.MetaFields
+                    YesMetaFieldsFilters = firstTrack.MetaFields
                 }).ToList();
 
             subFingerprints.Count.Should().Be(1);
@@ -189,7 +189,7 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
 
         private Hashes GetGenericHashesFingerprints()
         {
-            return new Hashes(new[] { new HashedFingerprint(GenericHashBuckets(), 0, 0f, Array.Empty<byte>()) }, 200);
+            return new Hashes(new[] { new HashedFingerprint(GenericHashBuckets(), 0, 0f, Array.Empty<byte>()) }, 200, MediaType.Audio);
         }
     }
 }

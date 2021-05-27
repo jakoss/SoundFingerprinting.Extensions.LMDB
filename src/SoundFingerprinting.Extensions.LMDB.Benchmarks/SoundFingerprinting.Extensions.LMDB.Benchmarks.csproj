@@ -22,9 +22,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
-    <PackageReference Include="SoundFingerprinting" Version="7.4.7" />
+    <PackageReference Include="SoundFingerprinting" Version="7.9.9" />
   </ItemGroup>
 
   <ItemGroup>
