@@ -6,6 +6,8 @@
 
 Database adapter for SoundFingerprinting algorithm using LMDB database. It's fast, it's persistent and safe from data violation.
 
+# **Beware** that this adapter supports only audio fingerprints storage. It should be possible to implement video storage as well, but i do not have time to proceed with that functionality. Library is open for contributions
+
 ## Usage
 
 To get library simply install it from [Nuget](https://www.nuget.org/packages/SoundFingerprinting.Extensions.LMDB):
