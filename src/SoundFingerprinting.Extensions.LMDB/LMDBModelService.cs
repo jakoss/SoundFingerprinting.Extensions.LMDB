@@ -14,6 +14,7 @@ namespace SoundFingerprinting.Extensions.LMDB
 {
     public sealed class LMDBModelService : IModelService, IDisposable
     {
+        private const string VIDEO_NOT_SUPPORTED_MESSAGE = "This storage is designed to handle only audio media type of tracks";
         private const string Id = "lmdb-model-service";
         private readonly DatabaseContext databaseContext;
 
@@ -34,20 +35,31 @@ namespace SoundFingerprinting.Extensions.LMDB
             databaseContext.CopyAndCompactLmdbDatabase(newPath);
         }
 
-        public void Insert(TrackInfo trackInfo, Hashes hashes)
+        public void Insert(TrackInfo trackInfo, AVHashes hashes)
         {
-            var fingerprints = hashes.ToList();
+            if (trackInfo.MediaType.HasFlag(MediaType.Video) || hashes.Audio is null)
+            {
+                throw new NotSupportedException(VIDEO_NOT_SUPPORTED_MESSAGE);
+            }
+
+            var audioHashes = hashes.Audio;
+            var fingerprints = audioHashes.ToList();
             if (fingerprints.Count == 0)
             {
                 return;
             }
 
-            var trackData = TrackDao.InsertTrack(trackInfo, hashes.DurationInSeconds);
-            SubFingerprintDao.InsertHashDataForTrack(hashes, trackData.TrackReference);
+            var trackData = TrackDao.InsertTrack(trackInfo, audioHashes.DurationInSeconds);
+            SubFingerprintDao.InsertHashDataForTrack(audioHashes, trackData.TrackReference);
         }
 
         public void UpdateTrack(TrackInfo trackInfo)
         {
+            if (trackInfo.MediaType.HasFlag(MediaType.Video))
+            {
+                throw new NotSupportedException(VIDEO_NOT_SUPPORTED_MESSAGE);
+            }
+
             var track = TrackDao.ReadTrackById(trackInfo.Id);
             if (track == null)
             {
@@ -57,7 +69,7 @@ namespace SoundFingerprinting.Extensions.LMDB
             var subFingerprints = SubFingerprintDao.ReadHashedFingerprintsByTrackReference(track.TrackReference);
             var hashes = new Hashes(subFingerprints.Select(subFingerprint => new HashedFingerprint(subFingerprint.Hashes, subFingerprint.SequenceNumber, subFingerprint.SequenceAt, subFingerprint.OriginalPoint)), track.Length, track.MediaType);
             DeleteTrack(trackInfo.Id);
-            Insert(trackInfo, hashes);
+            Insert(trackInfo, new AVHashes(hashes, null));
         }
 
         public void DeleteTrack(string trackId)
@@ -75,6 +87,11 @@ namespace SoundFingerprinting.Extensions.LMDB
 
         public IEnumerable<SubFingerprintData> Query(Hashes hashes, QueryConfiguration config)
         {
+            if (hashes.MediaType != MediaType.Audio)
+            {
+                throw new NotSupportedException(VIDEO_NOT_SUPPORTED_MESSAGE);
+            }
+
             var queryHashes = hashes.Select(hashedFingerprint => hashedFingerprint.HashBins);
             return hashes.Count > 0 ? SubFingerprintDao.ReadSubFingerprints(queryHashes, config) : Enumerable.Empty<SubFingerprintData>();
         }

@@ -5,7 +5,6 @@ using SoundFingerprinting.DAO;
 using SoundFingerprinting.DAO.Data;
 using SoundFingerprinting.Data;
 using SoundFingerprinting.Extensions.LMDB.LMDBDatabase;
-using SoundFingerprinting.Strides;
 
 using System;
 using System.Collections.Concurrent;
@@ -171,16 +170,11 @@ namespace SoundFingerprinting.Extensions.LMDB.Tests.Integration
             var hashData = FingerprintCommandBuilder.Instance
                 .BuildFingerprintCommand()
                 .From(GetAudioSamples())
-                .WithFingerprintConfig(config =>
-                    {
-                        config.Stride = new StaticStride(0);
-                        return config;
-                    })
                 .UsingServices(audioService)
                 .Hash()
                 .Result;
 
-            subFingerprintDao.InsertHashDataForTrack(hashData, trackReference);
+            subFingerprintDao.InsertHashDataForTrack(hashData.Audio, trackReference);
             var actualTrack = trackDao.ReadTrackById(tagInfo.ISRC);
             actualTrack.Should().NotBeNull();
             AssertTracksAreEqual(track, actualTrack);
