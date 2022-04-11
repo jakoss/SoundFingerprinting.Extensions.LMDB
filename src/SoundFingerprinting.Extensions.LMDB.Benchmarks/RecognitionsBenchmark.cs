@@ -34,19 +34,19 @@ namespace SoundFingerprinting.Extensions.LMDB.Benchmarks
 
         [Benchmark(Baseline = true)]
         [ArgumentsSource(nameof(Files))]
-        public QueryResult InMemoryRecognitions(string audioFile)
+        public AVQueryResult InMemoryRecognitions(string audioFile)
         {
             return RunQuery(audioFile, inMemoryModelService);
         }
 
         [Benchmark]
         [ArgumentsSource(nameof(Files))]
-        public QueryResult LMDBRecognitions(string audioFile)
+        public AVQueryResult LMDBRecognitions(string audioFile)
         {
             return RunQuery(audioFile, lmdbModelService);
         }
 
-        private QueryResult RunQuery(string audioFile, IModelService modelService)
+        private AVQueryResult RunQuery(string audioFile, IModelService modelService)
         {
             return QueryCommandBuilder.Instance.BuildQueryCommand()
                 .From(Path.Combine(refs_path, audioFile))
